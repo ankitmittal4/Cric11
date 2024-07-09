@@ -2,14 +2,18 @@
   "name": "cric11",
   "version": "1.0.0",
   "description": "Backend for cric11 project",
+  "type": "module",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "nodemon index.js"
   },
   "keywords": [
     "javascript",
     "backend"
   ],
   "author": "Ankit Mittal",
-  "license": "ISC"
+  "license": "ISC",
+  "devDependencies": {
+    "nodemon": "^3.1.4"
+  }
 }
