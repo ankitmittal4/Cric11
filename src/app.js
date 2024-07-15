@@ -19,8 +19,12 @@ app.use(cookieParser());
 
 //import routes
 import userRouter from "./routes/user.routes.js";
+import contestRouter from "./routes/contest.routes.js";
+import userTeamRouter from "./routes/userTeam.routes.js";
 
 //routes declaration
 app.use("/api/v1/users", userRouter);
+app.use("/api/v1/contests", contestRouter);
+// app.use("/api/v1/user-team", userTeamRouter);
 
 export { app };
