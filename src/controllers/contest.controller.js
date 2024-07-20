@@ -19,9 +19,10 @@ const getAllContests = asyncHandler(async (req, res) => {
 });
 const getContestById = asyncHandler(async (req, res) => {
   try {
-    const { contestId } = req.params;
-    const contest = await Contest.findById(contestId);
-    console.log("Contest with given id: ", contest);
+    // console.log("req.params: ", req.params);
+    const { id } = req.body;
+    const contest = await Contest.findById(id);
+    // console.log("Contest with given id: ", contest);
     if (!contest) {
       throw new ApiError(400, "Contest not found");
     }
@@ -40,6 +41,7 @@ const getContestById = asyncHandler(async (req, res) => {
 });
 
 const createContest = asyncHandler(async (req, res) => {
+  console.log("------------");
   const {
     matchId,
     entryFee,
@@ -48,6 +50,7 @@ const createContest = asyncHandler(async (req, res) => {
     currentParticipants,
     status,
   } = req.body;
+  console.log("++++++++++++");
   if (
     [
       matchId,
@@ -76,4 +79,25 @@ const createContest = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, contest, "Contest created successfully"));
 });
 
-export { getAllContests, getContestById, createContest };
+const deleteContest = asyncHandler(async (req, res) => {
+  try {
+    // console.log("req.params: ", req.params);
+    const { id } = req.body;
+    // console.log("id: ", id);
+    const removedContest = await Contest.findByIdAndDelete(id);
+    // console.log("removed contest: ", removedContest);
+
+    if (!removedContest) {
+      throw new ApiError(400, "Removed Contest not found");
+    }
+    res
+      .status(200)
+      .json(
+        new ApiResponse(200, {}, "Contest with given id deleted successfully")
+      );
+  } catch (error) {
+    throw new ApiError(500, "Error while deleting contest with given id");
+  }
+});
+
+export { getAllContests, getContestById, createContest, deleteContest };

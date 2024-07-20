@@ -3,8 +3,9 @@ import mongoose, { Schema } from "mongoose";
 const contestSchema = new Schema(
   {
     matchId: {
-      type: Schema.Types.ObjectId,
-      ref: "Match",
+      // type: Schema.Types.ObjectId,
+      // ref: "Match",
+      type: String,
     },
     entryFee: {
       type: Number,

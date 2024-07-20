@@ -3,13 +3,15 @@ import {
   getAllContests,
   getContestById,
   createContest,
+  deleteContest,
 } from "../controllers/contest.controller.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 
 const router = Router();
 
-router.route("/all-contests").get(getAllContests);
-router.route("/c/:id").post(getContestById);
-router.route("/create-contest").post(createContest);
+router.route("/all").get(getAllContests);
+router.route("/get").post(getContestById);
+router.route("/create").post(createContest);
+router.route("/delete").delete(deleteContest);
 
 export default router;
