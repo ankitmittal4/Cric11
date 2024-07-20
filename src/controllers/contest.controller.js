@@ -100,4 +100,41 @@ const deleteContest = asyncHandler(async (req, res) => {
   }
 });
 
-export { getAllContests, getContestById, createContest, deleteContest };
+const updateContest = asyncHandler(async (req, res) => {
+  try {
+    // console.log("req.body: ", req.body);
+    const { id, data } = req.body;
+    if (!id) {
+      throw new ApiError(400, "Id is required");
+    }
+    const updateContest = await Contest.findByIdAndUpdate(
+      id,
+      {
+        $set: data,
+      },
+      {
+        new: true,
+      }
+    );
+    if (!updateContest) {
+      throw new ApiError(404, "Contest not found");
+    }
+    console.log("UpdatedContest", updateContest);
+    res
+      .status(200)
+      .json(
+        new ApiResponse(200, updateContest, "Contest updated successfully")
+      );
+  } catch (error) {
+    console.log("Error in updating contest: ", error);
+    throw new ApiError(500, "Error in updating contest");
+  }
+});
+
+export {
+  getAllContests,
+  getContestById,
+  createContest,
+  deleteContest,
+  updateContest,
+};
