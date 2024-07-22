@@ -6,9 +6,11 @@ import jwt from "jsonwebtoken";
 
 const getAllPlayers = asyncHandler(async (req, res) => {
   try {
-    const players = await Player.find()
-      .populate("matchId", "teamA teamB startTime")
-      .populate("teamId", "teamName");
+    const players = await Player.find().populate(
+      "matchId",
+      "teamA teamB startTime"
+    );
+    // .populate("teamId", "teamName");
     if (!players) {
       throw new ApiError(400, "Players not found");
     }
@@ -23,9 +25,11 @@ const getAllPlayers = asyncHandler(async (req, res) => {
 
 const getPlayerById = asyncHandler(async (req, res) => {
   try {
-    const player = await Player.findById(req.body.id)
-      .populate("matchId", "teamA teamB startTime")
-      .populate("teamId", "teamName");
+    const player = await Player.findById(req.body.id).populate(
+      "matchId",
+      "teamA teamB startTime"
+    );
+    // .populate("teamId", "teamName");
     if (!player) {
       throw new ApiError(402, "Player with given id not found");
     }
@@ -81,9 +85,8 @@ const updatePlayer = asyncHandler(async (req, res) => {
       {
         new: true,
       }
-    )
-      .populate("matchId", "teamA teamB startTime")
-      .populate("teamId", "teamName");
+    ).populate("matchId", "teamA teamB startTime");
+    // .populate("teamId", "teamName");
     if (!updatedPlayer) {
       throw new ApiError(500, "Player not found");
     }

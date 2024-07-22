@@ -13,7 +13,7 @@ const router = Router();
 router.route("/all").get(getAllPlayers);
 router.route("/get").post(getPlayerById);
 router.route("/create").post(createPlayer);
-router.route("/update").post(updatePlayer);
+router.route("/update").patch(updatePlayer);
 router.route("/delete").delete(deletePlayer);
 
 export default router;

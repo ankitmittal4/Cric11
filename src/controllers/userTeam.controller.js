@@ -30,13 +30,14 @@ const getUserTeamById = asyncHandler(async (req, res) => {
     const userTeam = await UserTeam.findById(req.body.id)
       .populate("userId", "username email")
       .populate("contestId", "entryFee prizePool status")
-      .populate("matchId", "teamA teamB startTime")
-      .populate("players", "name team role")
-      .populate("captain", "name team role")
-      .populate("viceCaptain", "name team role");
+      .populate("matchId", "teamA teamB startTime");
+    // .populate("players", "name team role")
+    // .populate("captain", "name team role")
+    // .populate("viceCaptain", "name team role");
     if (!userTeam) {
       throw new ApiError(402, "User Team with given id not found");
     }
+    console.log("userteam: ", userTeam);
     res
       .status(200)
       .json(
@@ -56,13 +57,13 @@ const createUserTeam = asyncHandler(async (req, res) => {
     const { userID, contestId, matchId, players, captain, viceCaptain } =
       req.body;
     if (
-      [userID, contestId, matchId, players, captain, viceCaptain].some(
+      [userID, contestId, matchId, captain, viceCaptain].some(
         (field) => field?.trim() === ""
       )
     ) {
       throw new ApiError(400, "All fields are required");
     }
-    const userTeam = await userTeam.create({
+    const userTeam = await UserTeam.create({
       userID,
       contestId,
       matchId,

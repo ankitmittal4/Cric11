@@ -8,8 +8,9 @@ const teamSchema = new Schema(
     },
     players: [
       {
-        type: Schema.Types.ObjectId,
-        ref: "Player",
+        type: String,
+        // type: Schema.Types.ObjectId,
+        // ref: "Player",
       },
     ],
   },

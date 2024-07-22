@@ -16,20 +16,23 @@ const userTeamSchema = new Schema(
     },
     players: [
       {
-        type: Schema.Types.ObjectId,
-        ref: "Player",
-        required: true,
+        // type: Schema.Types.ObjectId,
+        // ref: "Player",
+        // required: true,
+        type: String,
       },
     ],
     captain: {
-      type: Schema.Types.ObjectId,
-      ref: "Player",
-      required: true,
+      type: String,
+      // type: Schema.Types.ObjectId,
+      // ref: "Player",
+      // required: true,
     },
     viceCaptain: {
-      type: Schema.Types.ObjectId,
-      ref: "Player",
-      required: true,
+      type: String,
+      // type: Schema.Types.ObjectId,
+      // ref: "Player",
+      // required: true,
     },
   },
   { timestamps: true }

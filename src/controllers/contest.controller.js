@@ -6,7 +6,7 @@ import jwt from "jsonwebtoken";
 
 const getAllContests = asyncHandler(async (req, res) => {
   try {
-    const contests = await Contest.find();
+    const contests = await Contest.find().populate("matchId", "_id sport");
     console.log("All Contests: ", contests);
     res
       .status(200)
@@ -21,7 +21,7 @@ const getContestById = asyncHandler(async (req, res) => {
   try {
     // console.log("req.params: ", req.params);
     const { id } = req.body;
-    const contest = await Contest.findById(id);
+    const contest = await Contest.findById(id).populate("matchId", "_id sport");
     // console.log("Contest with given id: ", contest);
     if (!contest) {
       throw new ApiError(400, "Contest not found");
@@ -115,7 +115,7 @@ const updateContest = asyncHandler(async (req, res) => {
       {
         new: true,
       }
-    );
+    ).populate("matchId", "_id sport");
     if (!updateContest) {
       throw new ApiError(404, "Contest not found");
     }
