@@ -25,10 +25,27 @@ const upcomingMatches = asyncHandler(async (req, res) => {
     const upcomingMatches = await axios.get(upcomingMatchesApiUrl);
     if (
       !(upcomingMatches.data.status === "success") ||
-      !upcomingMatches.data.length
+      !upcomingMatches.data.data.length
     ) {
       throw new ApiError(400, "Error while fetching data");
     }
+    // console.log(upcomingMatches.data.data[0].ms);
+    // upcomingMatches.data.data.map((match) => console.log(match.ms));
+    const today = new Date();
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate + 1);
+
+    const formatDate = (date) => date.toISOString().split("T")[0];
+    const todayStr = formatDate(today);
+    const tomorrowStr = formatDate(tomorrow);
+
+    const filteredMatches = upcomingMatches.data.data.filter(
+      (match) =>
+        match.ms === "fixture" &&
+        (match.formatDate(dateTimeGMT) === todayStr ||
+          match.formatDate(dateTimeGMT) === tomorrowStr)
+    );
+    console.log(filteredMatches);
 
     res
       .status(200)
