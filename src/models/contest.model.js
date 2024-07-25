@@ -18,10 +18,6 @@ const contestSchema = new Schema(
       type: Number,
       required: true,
     },
-    currentParticipants: {
-      type: Number,
-      required: true,
-    },
     status: {
       type: String,
       enum: ["Open", "Closed", "Completed"],

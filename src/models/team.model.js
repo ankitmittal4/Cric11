@@ -6,13 +6,13 @@ const teamSchema = new Schema(
       type: String,
       required: true,
     },
-    players: [
-      {
-        type: String,
-        // type: Schema.Types.ObjectId,
-        // ref: "Player",
-      },
-    ],
+    // players: [
+    //   {
+    //     type: String,
+    //     // type: Schema.Types.ObjectId,
+    //     // ref: "Player",
+    //   },
+    // ],
   },
   { timestamps: true }
 );

@@ -47,7 +47,7 @@ const createContest = asyncHandler(async (req, res) => {
     entryFee,
     prizePool,
     maxParticipants,
-    currentParticipants,
+    // currentParticipants,
     status,
   } = req.body;
   console.log("++++++++++++");
@@ -57,7 +57,7 @@ const createContest = asyncHandler(async (req, res) => {
       entryFee,
       prizePool,
       maxParticipants,
-      currentParticipants,
+      // currentParticipants,
       status,
     ].some((field) => field?.trim() === "")
   ) {
@@ -68,7 +68,7 @@ const createContest = asyncHandler(async (req, res) => {
     entryFee,
     prizePool,
     maxParticipants,
-    currentParticipants,
+    // currentParticipants,
     status,
   });
   if (!contest) {

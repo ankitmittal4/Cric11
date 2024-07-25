@@ -6,18 +6,44 @@ import jwt from "jsonwebtoken";
 import axios from "axios";
 
 //matches list
-const apikey = "8c0c86ef-350f-436f-bf8a-d57ca0af5db5";
-const offset = 0;
-const url = `https://api.cricapi.com/v1/matches?apikey=8c0c86ef-350f-436f-bf8a-d57ca0af5db5&offset=0`;
-axios
-  .get(url)
-  .then((response) => {
-    console.log("Match api rsponse: ", response.data);
-  })
-  .catch((err) => {
-    console.log("Error in match api: ", err);
-  });
+// const apikey = "8c0c86ef-350f-436f-bf8a-d57ca0af5db5";
+// const offset = 0;
+// const url = `https://api.cricapi.com/v1/matches?apikey=8c0c86ef-350f-436f-bf8a-d57ca0af5db5&offset=0`;
+// axios
+//   .get(url)
+//   .then((response) => {
+//     console.log("Match api rsponse: ", response.data);
+//   })
+//   .catch((err) => {
+//     console.log("Error in match api: ", err);
+//   });
 
+const upcomingMatches = asyncHandler(async (req, res) => {
+  try {
+    const upcomingMatchesApiEndpoint = "cricScore";
+    const upcomingMatchesApiUrl = `${process.env.API_URL}${upcomingMatchesApiEndpoint}?apikey=${process.env.API_KEY}`;
+    const upcomingMatches = await axios.get(upcomingMatchesApiUrl);
+    if (
+      !(upcomingMatches.data.status === "success") ||
+      !upcomingMatches.data.length
+    ) {
+      throw new ApiError(400, "Error while fetching data");
+    }
+
+    res
+      .status(200)
+      .json(
+        new ApiResponse(
+          200,
+          upcomingMatches.data,
+          "All matches fetched successfully"
+        )
+      );
+  } catch (error) {
+    console.log("Error while fetching all matches: ", error);
+    throw new ApiError(500, "Error while fetching matches");
+  }
+});
 const getAllMatches = asyncHandler(async (req, res) => {
   try {
     const matches = await Match.find();
@@ -100,4 +126,10 @@ const deleteMatch = asyncHandler(async (req, res) => {
   }
 });
 
-export { getAllMatches, getMatchById, createMatch, deleteMatch };
+export {
+  getAllMatches,
+  getMatchById,
+  createMatch,
+  deleteMatch,
+  upcomingMatches,
+};
