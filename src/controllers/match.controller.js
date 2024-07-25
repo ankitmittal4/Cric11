@@ -29,36 +29,43 @@ const upcomingMatches = asyncHandler(async (req, res) => {
     ) {
       throw new ApiError(400, "Error while fetching data");
     }
-    // console.log(upcomingMatches.data.data[0].ms);
-    // upcomingMatches.data.data.map((match) => console.log(match.ms));
     const today = new Date();
     const tomorrow = new Date();
-    tomorrow.setDate(tomorrow.getDate + 1);
+    tomorrow.setDate(tomorrow.getDate() + 1);
 
     const formatDate = (date) => date.toISOString().split("T")[0];
     const todayStr = formatDate(today);
     const tomorrowStr = formatDate(tomorrow);
 
-    const filteredMatches = upcomingMatches.data.data.filter(
-      (match) =>
+    const filteredMatches = upcomingMatches.data.data.filter((match) => {
+      const matchTimeGMT = match.dateTimeGMT;
+      const matchDateGMT = new Date(matchTimeGMT);
+      const ISTOffset = 5.5 * 60 * 60 * 1000;
+      const matchTimeIST = new Date(matchDateGMT.getTime() + ISTOffset);
+      const matchTimeISTStr = matchTimeIST
+        .toISOString()
+        .replace("Z", "")
+        .replace("T", " ")
+        .slice(0, 10);
+      return (
         match.ms === "fixture" &&
-        (match.formatDate(dateTimeGMT) === todayStr ||
-          match.formatDate(dateTimeGMT) === tomorrowStr)
-    );
-    console.log(filteredMatches);
+        (matchTimeISTStr === todayStr || matchTimeISTStr === tomorrowStr)
+      );
+    });
+    console.log("filteredMatches: ", filteredMatches);
 
     res
       .status(200)
       .json(
         new ApiResponse(
           200,
-          upcomingMatches.data,
-          "All matches fetched successfully"
+          filteredMatches,
+          "All upcoming matches fetched successfully"
         )
       );
   } catch (error) {
-    console.log("Error while fetching all matches: ", error);
-    throw new ApiError(500, "Error while fetching matches");
+    console.log("Error while fetching upcoming matches: ", error);
+    throw new ApiError(500, "Error while fetching upcoming matches");
   }
 });
 const getAllMatches = asyncHandler(async (req, res) => {
