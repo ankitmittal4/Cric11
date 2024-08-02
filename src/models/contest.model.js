@@ -14,16 +14,16 @@ const contestSchema = new Schema(
       type: Number,
       required: true,
     },
-    maxParticipants: {
+    totalSpots: {
       type: Number,
       required: true,
     },
-    status: {
-      type: String,
-      enum: ["Open", "Closed", "Completed"],
-      default: "Open",
-      required: true,
-    },
+    // status: {
+    //   type: String,
+    //   enum: ["Open", "Closed", "Completed"],
+    //   default: "Open",
+    //   required: true,
+    // },
   },
   { timestamps: true }
 );
