@@ -14,14 +14,23 @@ const contestSchema = new Schema(
       type: Number,
       required: true,
     },
-    maxParticipants: {
+    totalSpots: {
       type: Number,
       required: true,
     },
+<<<<<<< HEAD
     matchRef: {
       type: Schema.Types.ObjectId,
       ref: "Match",
     },
+=======
+    // status: {
+    //   type: String,
+    //   enum: ["Open", "Closed", "Completed"],
+    //   default: "Open",
+    //   required: true,
+    // },
+>>>>>>> e11e05e3f2f4e6f67dee67708576382dc15eac8d
   },
   { timestamps: true }
 );

@@ -43,11 +43,31 @@ const getContestById = asyncHandler(async (req, res) => {
 });
 
 const createContest = asyncHandler(async (req, res) => {
+<<<<<<< HEAD
   const { matchId, entryFee, prizePool, maxParticipants } = req.body;
   if (
     [matchId, entryFee, prizePool, maxParticipants].some(
       (field) => field?.trim() === ""
     )
+=======
+  const {
+    matchId,
+    entryFee,
+    prizePool,
+    totalSpots,
+    // currentParticipants,
+    // status,
+  } = req.body;
+  if (
+    [
+      matchId,
+      entryFee,
+      prizePool,
+      totalSpots,
+      // currentParticipants,
+      // status,
+    ].some((field) => field?.trim() === "")
+>>>>>>> e11e05e3f2f4e6f67dee67708576382dc15eac8d
   ) {
     throw new ApiError(400, "All fields are required");
   }
@@ -99,8 +119,14 @@ const createContest = asyncHandler(async (req, res) => {
     matchId,
     entryFee,
     prizePool,
+<<<<<<< HEAD
     maxParticipants,
     matchRef,
+=======
+    totalSpots,
+    // currentParticipants,
+    // status,
+>>>>>>> e11e05e3f2f4e6f67dee67708576382dc15eac8d
   });
   if (!contest) {
     throw new ApiError(500, "Something went wrong while creating a contest");
