@@ -3,8 +3,8 @@ import mongoose, { Schema } from "mongoose";
 const contestSchema = new Schema(
   {
     matchId: {
-      type: Schema.Types.ObjectId,
-      ref: "Match",
+      type: String,
+      required: true,
     },
     entryFee: {
       type: Number,
@@ -18,11 +18,9 @@ const contestSchema = new Schema(
       type: Number,
       required: true,
     },
-    status: {
-      type: String,
-      enum: ["Open", "Closed", "Completed"],
-      default: "Open",
-      required: true,
+    matchRef: {
+      type: Schema.Types.ObjectId,
+      ref: "Match",
     },
   },
   { timestamps: true }

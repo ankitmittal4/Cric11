@@ -6,11 +6,11 @@ const matchSchema = new Schema(
       type: String,
       required: true,
     },
-    // sport: {
-    //   type: String,
-    //   // required: true,
-    // },
+
     matchType: {
+      type: String,
+    },
+    name: {
       type: String,
     },
     teamA: {
@@ -21,17 +21,12 @@ const matchSchema = new Schema(
       type: String,
       required: true,
     },
-    startTime: {
-      type: Date,
-      required: true,
-    },
-    // endTime: {
-    //   type: Date,
-    // },
-    status: {
+    date: {
       type: String,
-      // enum: ["Scheduled", "Ongoing", "Completed"],
-      // default: "Scheduled",
+    },
+    startTime: {
+      type: String,
+      required: true,
     },
     venue: {
       type: String,

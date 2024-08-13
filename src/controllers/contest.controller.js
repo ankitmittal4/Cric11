@@ -2,7 +2,9 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { Contest } from "../models/contest.model.js";
+import { Match } from "../models/match.model.js";
 import jwt from "jsonwebtoken";
+import axios from "axios";
 
 const getAllContests = asyncHandler(async (req, res) => {
   try {
@@ -41,39 +43,69 @@ const getContestById = asyncHandler(async (req, res) => {
 });
 
 const createContest = asyncHandler(async (req, res) => {
-  console.log("------------");
-  const {
-    matchId,
-    entryFee,
-    prizePool,
-    maxParticipants,
-    // currentParticipants,
-    status,
-  } = req.body;
-  console.log("++++++++++++");
+  const { matchId, entryFee, prizePool, maxParticipants } = req.body;
   if (
-    [
-      matchId,
-      entryFee,
-      prizePool,
-      maxParticipants,
-      // currentParticipants,
-      status,
-    ].some((field) => field?.trim() === "")
+    [matchId, entryFee, prizePool, maxParticipants].some(
+      (field) => field?.trim() === ""
+    )
   ) {
     throw new ApiError(400, "All fields are required");
   }
+
+  //api call for matchInfo
+  const matchInfoApiEndpoint = "match_info";
+  const matchInfoApiUrl = `${process.env.API_URL}${matchInfoApiEndpoint}?apikey=${process.env.API_KEY}&id=${matchId}`;
+  const matchInfo = await axios.get(matchInfoApiUrl);
+  // console.log("matchInfo: ", matchInfo.data.data);
+  const { name, matchType, venue, teams, dateTimeGMT } = matchInfo.data.data;
+  const teamA = teams[0];
+  const teamB = teams[1];
+
+  //convert time
+  const matchTimeGMT = dateTimeGMT;
+  const matchDateGMT = new Date(matchTimeGMT);
+  const ISTOffset = 5.5 * 60 * 60 * 1000;
+  const matchTimeIST = new Date(matchDateGMT.getTime() + ISTOffset);
+
+  const matchDate = matchTimeGMT.slice(0, 10);
+  const matchTimeISTStr = matchTimeIST.toTimeString().slice(0, 8);
+  const date = matchDate;
+  const startTime = matchTimeISTStr;
+
+  if (
+    [matchId, name, matchType, teamA, teamB, startTime, date, venue].some(
+      (field) => field?.trim() === ""
+    )
+  ) {
+    throw new ApiError(400, "All fields are required");
+  }
+
+  const match = await Match.create({
+    matchId,
+    matchType,
+    name,
+    teamA,
+    teamB,
+    date,
+    startTime,
+    venue,
+  });
+  if (!match) {
+    throw new ApiError(500, "Something went wrong while creating a match");
+  }
+
+  const matchRef = match._id;
   const contest = await Contest.create({
     matchId,
     entryFee,
     prizePool,
     maxParticipants,
-    // currentParticipants,
-    status,
+    matchRef,
   });
   if (!contest) {
     throw new ApiError(500, "Something went wrong while creating a contest");
   }
+
   return res
     .status(201)
     .json(new ApiResponse(200, contest, "Contest created successfully"));
