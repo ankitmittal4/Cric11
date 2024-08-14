@@ -8,7 +8,25 @@ import axios from "axios";
 
 const getAllContests = asyncHandler(async (req, res) => {
   try {
-    const contests = await Contest.find().populate("matchId", "_id sport");
+    // const contests = await Contest.find().populate(
+    //   "matchRef",
+    //   "matchType name teamA teamB startTime venue"
+    // );
+
+    const contests = await Contest.aggregate([
+      {
+        $lookup: {
+          from: "matches",
+          localField: "matchRef",
+          foreignField: "_id",
+          as: "match",
+        },
+      },
+      {
+        $unwind: "$match",
+      },
+    ]);
+
     console.log("All Contests: ", contests);
     res
       .status(200)
