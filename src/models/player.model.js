@@ -2,30 +2,33 @@ import mongoose, { Schema } from "mongoose";
 
 const playerSchema = new Schema(
   {
-    name: {
-      type: String,
-      required: true,
-    },
-    team: {
-      type: String,
-      required: true,
-    },
-    role: {
-      type: String,
-      enum: ["Batsman", "Bowler", "Wicket-Keeper", "All-Rounder"],
-      required: true,
-    },
-    credits: {
-      type: Number,
-    },
     matchId: {
-      type: Schema.Types.ObjectId,
-      ref: "Match",
+      type: String,
     },
-    teamId: {
-      type: Schema.Types.ObjectId,
-      ref: "Team",
-    },
+    squad: [
+      {
+        teamName: {
+          type: String,
+          required: true,
+        },
+        players: [
+          {
+            playerId: {
+              type: String,
+            },
+            name: {
+              type: String,
+            },
+            role: {
+              type: String,
+            },
+            country: {
+              type: String,
+            },
+          },
+        ],
+      },
+    ],
   },
   { timestamps: true }
 );

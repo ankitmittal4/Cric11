@@ -3,6 +3,7 @@ import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { Contest } from "../models/contest.model.js";
 import { Match } from "../models/match.model.js";
+import { Player } from "../models/player.model.js";
 import jwt from "jsonwebtoken";
 import axios from "axios";
 
@@ -111,6 +112,26 @@ const createContest = asyncHandler(async (req, res) => {
   if (!match) {
     throw new ApiError(500, "Something went wrong while creating a match");
   }
+
+  //FIXME: players database call
+  const matchSquadApiEndpoint = "match_squad";
+  const matchSquadApiUrl = `${process.env.API_URL}${matchSquadApiEndpoint}?apikey=${process.env.API_KEY}&id=${matchId}`;
+  const matchSquadInfo = await axios.get(matchSquadApiUrl);
+  // console.log("matchInfo: ", matchInfo.data.data);
+  const { data } = matchSquadInfo.data;
+
+  // if ([teamName, players].some((field) => field?.trim() === "")) {
+  //   throw new ApiError(400, "All fields are required");
+  // }
+
+  const match_squad = await Player.create({
+    matchId,
+    squad: data,
+  });
+  if (!match_squad) {
+    throw new ApiError(500, "Something went wrong while creating a squad");
+  }
+  //FIXME: squad/player controller done
 
   const matchRef = match._id;
   const contest = await Contest.create({
