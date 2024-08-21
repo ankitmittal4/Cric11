@@ -7,8 +7,9 @@ const userContestSchema = new Schema(
       ref: "User",
     },
     contestId: {
-      type: Schema.Types.ObjectId,
-      ref: "Contest",
+      type: Sting,
+      // type: Schema.Types.ObjectId,
+      // ref: "Contest",
     },
     playedDate: {
       type: Date,
