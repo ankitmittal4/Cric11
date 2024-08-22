@@ -1,16 +1,19 @@
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
-import { UserContest } from "../models/userContest.model";
+import { UserContest } from "../models/userContest.model.js";
 
 const createUserContest = async (req, res) => {
+  // console.log("req.user: ", req.user);
+  const { _id } = req.user;
+  const { contestId, matchId, players, captain, viceCaptain } = req.body;
   const userContest = new UserContest({
-    userId: req.user.id,
-    contestId: req.body.contestId,
-    matchId: req.body.matchId,
-    players: req.body.players,
-    captain: req.body.captain,
-    viceCaptain: req.body.viceCaptain,
+    userId: _id,
+    contestId,
+    matchId,
+    players,
+    captain,
+    viceCaptain,
   });
 
   try {
@@ -24,7 +27,7 @@ const createUserContest = async (req, res) => {
           "User contest created successfully"
         )
       );
-  } catch (err) {
+  } catch (error) {
     console.log("Error while creating user Contest: ", error);
     throw new ApiError(400, "Error while creating user Contests");
   }

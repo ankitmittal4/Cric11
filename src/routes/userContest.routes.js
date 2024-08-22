@@ -4,6 +4,6 @@ import { verifyJWT } from "../middlewares/auth.middleware.js";
 
 const router = Router();
 
-router.route("/create").post(createUserContest);
+router.route("/create").post(verifyJWT, createUserContest);
 
 export default router;
