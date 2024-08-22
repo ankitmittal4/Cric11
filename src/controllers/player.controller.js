@@ -10,6 +10,7 @@ const getAllPlayers = asyncHandler(async (req, res) => {
       "matchId",
       "teamA teamB startTime"
     );
+    console.log("players: ", players);
     // .populate("teamId", "teamName");
     if (!players) {
       throw new ApiError(400, "Players not found");

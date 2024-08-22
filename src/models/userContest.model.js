@@ -15,6 +15,7 @@ const userContestSchema = new Schema(
     matchId: {
       type: Schema.Types.ObjectId,
       ref: "Match",
+      // type: String,
       required: true,
     },
     players: [
