@@ -6,6 +6,7 @@ import { Match } from "../models/match.model.js";
 import { Player } from "../models/player.model.js";
 import jwt from "jsonwebtoken";
 import axios from "axios";
+import mongoose from "mongoose";
 
 const getAllContests = asyncHandler(async (req, res) => {
   try {
@@ -42,9 +43,45 @@ const getContestById = asyncHandler(async (req, res) => {
   try {
     // console.log("req.params: ", req.params);
     const { id } = req.body;
-    const contest = await Contest.findById(id).populate("matchId", "_id sport");
-    // console.log("Contest with given id: ", contest);
-    if (!contest) {
+    const contest = await Contest.findById(id).populate(
+      "matchRef squadRef",
+      "matchType name teamA teamB startTime venue date squad"
+    );
+    console.log("contest: ", contest);
+
+    // console.log("id: ", id);
+    // const contest = await Contest.aggregate([
+    //   {
+    //     $match: { _id: mongoose.Types.ObjectId(id) },
+    //   },
+    //   {
+    //     $lookup: {
+    //       from: "matches",
+    //       localField: "matchRef",
+    //       foreignField: "_id",
+    //       as: "match",
+    //     },
+    //   },
+    //   {
+    //     $unwind: "$match",
+    //   },
+    //   // {
+    //   //   $project: {
+    //   //     _id: 1,
+    //   //     prizePool: 1, // Include Contest name
+    //   //     entryFee: 1, // Include other Contest fields as needed
+    //   //     match: {
+    //   //       matchType: 1,
+    //   //       name: 1,
+    //   //       teamA: 1,
+    //   //       teamB: 1,
+    //   //       startTime: 1,
+    //   //       venue: 1,
+    //   //     },
+    //   //   },
+    //   // },
+    // ]);
+    if (!contest || contest.length === 0) {
       throw new ApiError(400, "Contest not found");
     }
     res
@@ -134,12 +171,14 @@ const createContest = asyncHandler(async (req, res) => {
   //FIXME: squad/player controller done
 
   const matchRef = match._id;
+  const squadRef = match_squad._id;
   const contest = await Contest.create({
     matchId,
     entryFee,
     prizePool,
     maxParticipants,
     matchRef,
+    squadRef,
   });
   if (!contest) {
     throw new ApiError(500, "Something went wrong while creating a contest");

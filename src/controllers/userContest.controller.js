@@ -38,10 +38,10 @@ const getAllUserContests = asyncHandler(async (req, res) => {
     const userId = req.user.id;
     const userContests = await UserContest.find({ userId })
       .populate("contestId", "name entryFee")
-      .populate("matchId", "teamA teamB startTime")
-      .populate("players", "name role")
-      .populate("captain", "name role")
-      .populate("viceCaptain", "name role");
+      .populate("matchId", "teamA teamB startTime");
+    // .populate("players", "name role")
+    // .populate("captain", "name role")
+    // .populate("viceCaptain", "name role");
 
     console.log("userContests: ", userContests);
     // console.log(">>>>>>>>>>>>>>>>>>>>");

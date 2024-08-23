@@ -22,6 +22,10 @@ const contestSchema = new Schema(
       type: Schema.Types.ObjectId,
       ref: "Match",
     },
+    squadRef: {
+      type: Schema.Types.ObjectId,
+      ref: "Player",
+    },
   },
   { timestamps: true }
 );
