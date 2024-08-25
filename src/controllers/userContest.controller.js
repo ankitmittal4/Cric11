@@ -37,15 +37,6 @@ const createUserContest = async (req, res) => {
 const getAllUserContests = asyncHandler(async (req, res) => {
   try {
     const userId = req.user.id;
-    // const userContests = await UserContest.find({ userId })
-    //   .populate("contestId", "entryFee prizePool maxParticipants squadRef")
-    //   .populate("matchId", "name teamA teamB date venue startTime matchType")
-    //   .populate("captain", "name role")
-    //   .populate("viceCaptain", "name role");
-
-    // .populate("players", "name role")
-
-    // console.log(new mongoose.O)
     const userContests = await UserContest.aggregate([
       {
         $match: { userId: new mongoose.Types.ObjectId(userId) },
@@ -63,15 +54,94 @@ const getAllUserContests = asyncHandler(async (req, res) => {
       },
       {
         $lookup: {
-          from: "players",
-          localField: "userContestData.squadRef",
+          from: "matches",
+          localField: "matchId",
           foreignField: "_id",
+          as: "matchData",
+        },
+      },
+      {
+        $unwind: "$matchData",
+      },
+      {
+        $lookup: {
+          from: "players",
+          let: { squadId: "$userContestData.squadRef" },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    {
+                      $eq: ["$_id", "$$squadId"],
+                    },
+                  ],
+                },
+              },
+            },
+          ],
           as: "squad",
         },
       },
+      {
+        $unwind: "$squad",
+      },
+      {
+        $project: {
+          playersIds: "$players",
+          team1: {
+            $arrayElemAt: ["$squad.squad", 0],
+          },
+          team2: {
+            $arrayElemAt: ["$squad.squad", 1],
+          },
+          userContestData: "$userContestData",
+          matchData: "$matchData",
+        },
+      },
+      {
+        $project: {
+          playersIds: "$playersIds",
+          players: {
+            $concatArrays: ["$team1.players", "$team2.players"],
+          },
+          userContestData: "$userContestData",
+          matchData: "$matchData",
+        },
+      },
+      {
+        $addFields: {
+          playing11: {
+            $filter: {
+              input: "$players",
+              as: "player",
+              cond: {
+                $in: ["$$player._id", "$playersIds"],
+              },
+            },
+          },
+        },
+      },
+      {
+        $project: {
+          contestDetails: {
+            entryFee: "$userContestData.entryFee",
+            prizePool: "$userContestData.prizePool",
+            maxParticipants: "$userContestData.maxParticipants",
+          },
+          user11: "$playing11",
+          matchDetails: {
+            name: "$matchData.name",
+            teamA: "$matchData.teamA",
+            teamB: "$matchData.teamB",
+            matchType: "$matchData.matchType",
+            date: "$matchData.date",
+            startTime: "$matchData.startTime",
+          },
+        },
+      },
     ]);
-
-    console.log(userContests);
+    // console.log(userContests);
     if (!userContests || userContests.length === 0) {
       return res
         .status(404)
@@ -91,4 +161,134 @@ const getAllUserContests = asyncHandler(async (req, res) => {
     throw new ApiError(500, "Error while fetching user contests");
   }
 });
-export { createUserContest, getAllUserContests };
+
+const getUserContestsById = asyncHandler(async (req, res) => {
+  try {
+    const { id } = req.body;
+    const userId = req.user.id;
+    const userContest = await UserContest.aggregate([
+      {
+        $match: { _id: new mongoose.Types.ObjectId(id) },
+      },
+      {
+        $lookup: {
+          from: "contests",
+          localField: "contestId",
+          foreignField: "_id",
+          as: "userContestData",
+        },
+      },
+      {
+        $unwind: "$userContestData",
+      },
+      {
+        $lookup: {
+          from: "matches",
+          localField: "matchId",
+          foreignField: "_id",
+          as: "matchData",
+        },
+      },
+      {
+        $unwind: "$matchData",
+      },
+      {
+        $lookup: {
+          from: "players",
+          let: { squadId: "$userContestData.squadRef" },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    {
+                      $eq: ["$_id", "$$squadId"],
+                    },
+                  ],
+                },
+              },
+            },
+          ],
+          as: "squad",
+        },
+      },
+      {
+        $unwind: "$squad",
+      },
+      {
+        $project: {
+          playersIds: "$players",
+          team1: {
+            $arrayElemAt: ["$squad.squad", 0],
+          },
+          team2: {
+            $arrayElemAt: ["$squad.squad", 1],
+          },
+          userContestData: "$userContestData",
+          matchData: "$matchData",
+        },
+      },
+      {
+        $project: {
+          playersIds: "$playersIds",
+          players: {
+            $concatArrays: ["$team1.players", "$team2.players"],
+          },
+          userContestData: "$userContestData",
+          matchData: "$matchData",
+        },
+      },
+      {
+        $addFields: {
+          playing11: {
+            $filter: {
+              input: "$players",
+              as: "player",
+              cond: {
+                $in: ["$$player._id", "$playersIds"],
+              },
+            },
+          },
+        },
+      },
+      {
+        $project: {
+          contestDetails: {
+            entryFee: "$userContestData.entryFee",
+            prizePool: "$userContestData.prizePool",
+            maxParticipants: "$userContestData.maxParticipants",
+          },
+          user11: "$playing11",
+          matchDetails: {
+            name: "$matchData.name",
+            teamA: "$matchData.teamA",
+            teamB: "$matchData.teamB",
+            matchType: "$matchData.matchType",
+            date: "$matchData.date",
+            startTime: "$matchData.startTime",
+          },
+          captain: 1,
+        },
+      },
+    ]);
+    console.log(userContest);
+    if (!userContest || userContest.length === 0) {
+      return res
+        .status(404)
+        .json({ message: "No contests found for this user with given id." });
+    }
+    res
+      .status(200)
+      .json(
+        new ApiResponse(
+          200,
+          userContest,
+          "user contest with given id fetched successfully"
+        )
+      );
+  } catch (error) {
+    console.log("error: ", error);
+    throw new ApiError(500, "Error while fetching user contest with given id");
+  }
+});
+export { createUserContest, getAllUserContests, getUserContestsById };
