@@ -29,7 +29,7 @@ const getAllContests = asyncHandler(async (req, res) => {
       },
     ]);
 
-    console.log("All Contests: ", contests);
+    // console.log("All Contests: ", contests);
     res
       .status(200)
       .json(
@@ -47,7 +47,7 @@ const getContestById = asyncHandler(async (req, res) => {
       "matchRef squadRef",
       "matchType name teamA teamB startTime venue date squad"
     );
-    console.log("contest: ", contest);
+    // console.log("contest: ", contest.squadRef.squad);
 
     // console.log("id: ", id);
     // const contest = await Contest.aggregate([
@@ -191,7 +191,9 @@ const createContest = asyncHandler(async (req, res) => {
 
 const deleteContest = asyncHandler(async (req, res) => {
   try {
-    // console.log("req.params: ", req.params);
+    // console.log("req.params: ", req.body);
+    // const { id } = req.params;
+
     const { id } = req.body;
     // console.log("id: ", id);
     const removedContest = await Contest.findByIdAndDelete(id);
@@ -206,6 +208,7 @@ const deleteContest = asyncHandler(async (req, res) => {
         new ApiResponse(200, {}, "Contest with given id deleted successfully")
       );
   } catch (error) {
+    console.log("error: ", error);
     throw new ApiError(500, "Error while deleting contest with given id");
   }
 });

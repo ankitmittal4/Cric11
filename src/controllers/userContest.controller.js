@@ -64,65 +64,6 @@ const getAllUserContests = asyncHandler(async (req, res) => {
         $unwind: "$matchData",
       },
       {
-        $lookup: {
-          from: "players",
-          let: { squadId: "$userContestData.squadRef" },
-          pipeline: [
-            {
-              $match: {
-                $expr: {
-                  $and: [
-                    {
-                      $eq: ["$_id", "$$squadId"],
-                    },
-                  ],
-                },
-              },
-            },
-          ],
-          as: "squad",
-        },
-      },
-      {
-        $unwind: "$squad",
-      },
-      {
-        $project: {
-          playersIds: "$players",
-          team1: {
-            $arrayElemAt: ["$squad.squad", 0],
-          },
-          team2: {
-            $arrayElemAt: ["$squad.squad", 1],
-          },
-          userContestData: "$userContestData",
-          matchData: "$matchData",
-        },
-      },
-      {
-        $project: {
-          playersIds: "$playersIds",
-          players: {
-            $concatArrays: ["$team1.players", "$team2.players"],
-          },
-          userContestData: "$userContestData",
-          matchData: "$matchData",
-        },
-      },
-      {
-        $addFields: {
-          playing11: {
-            $filter: {
-              input: "$players",
-              as: "player",
-              cond: {
-                $in: ["$$player._id", "$playersIds"],
-              },
-            },
-          },
-        },
-      },
-      {
         $project: {
           contestDetails: {
             entryFee: "$userContestData.entryFee",
@@ -141,7 +82,7 @@ const getAllUserContests = asyncHandler(async (req, res) => {
         },
       },
     ]);
-    // console.log(userContests);
+    console.log("All userContests: ", userContests);
     if (!userContests || userContests.length === 0) {
       return res
         .status(404)
@@ -226,6 +167,8 @@ const getUserContestsById = asyncHandler(async (req, res) => {
           },
           userContestData: "$userContestData",
           matchData: "$matchData",
+          captain: "$captain", // Add this line to include captain in the projection
+          viceCaptain: "$viceCaptain", // Add this line to include captain in the projection
         },
       },
       {
@@ -236,6 +179,8 @@ const getUserContestsById = asyncHandler(async (req, res) => {
           },
           userContestData: "$userContestData",
           matchData: "$matchData",
+          captain: "$captain", // Include captain here as well
+          viceCaptain: "$viceCaptain", // Include captain here as well
         },
       },
       {
@@ -267,11 +212,13 @@ const getUserContestsById = asyncHandler(async (req, res) => {
             date: "$matchData.date",
             startTime: "$matchData.startTime",
           },
-          captain: 1,
+          captain: 1, // Keep this line to ensure captain is in the final response
+          viceCaptain: 1,
         },
       },
     ]);
-    console.log(userContest);
+
+    // console.log("userContest: ", userContest);
     if (!userContest || userContest.length === 0) {
       return res
         .status(404)
@@ -291,4 +238,5 @@ const getUserContestsById = asyncHandler(async (req, res) => {
     throw new ApiError(500, "Error while fetching user contest with given id");
   }
 });
+
 export { createUserContest, getAllUserContests, getUserContestsById };
