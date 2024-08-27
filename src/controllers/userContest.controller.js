@@ -78,6 +78,8 @@ const getAllUserContests = asyncHandler(async (req, res) => {
             matchType: "$matchData.matchType",
             date: "$matchData.date",
             startTime: "$matchData.startTime",
+            teamAImg: "$matchData.teamAImg",
+            teamBImg: "$matchData.teamBImg",
           },
         },
       },

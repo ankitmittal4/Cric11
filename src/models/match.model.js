@@ -21,6 +21,12 @@ const matchSchema = new Schema(
       type: String,
       required: true,
     },
+    teamAImg: {
+      type: String,
+    },
+    teamBImg: {
+      type: String,
+    },
     date: {
       type: String,
     },

@@ -113,9 +113,12 @@ const createContest = asyncHandler(async (req, res) => {
   const matchInfoApiUrl = `${process.env.API_URL}${matchInfoApiEndpoint}?apikey=${process.env.API_KEY}&id=${matchId}`;
   const matchInfo = await axios.get(matchInfoApiUrl);
   // console.log("matchInfo: ", matchInfo.data.data);
-  const { name, matchType, venue, teams, dateTimeGMT } = matchInfo.data.data;
+  const { name, matchType, venue, teams, dateTimeGMT, teamInfo } =
+    matchInfo.data.data;
   const teamA = teams[0];
   const teamB = teams[1];
+  const teamAImg = teamInfo[0].img;
+  const teamBImg = teamInfo[1].img;
 
   //convert time
   const matchTimeGMT = dateTimeGMT;
@@ -142,6 +145,8 @@ const createContest = asyncHandler(async (req, res) => {
     name,
     teamA,
     teamB,
+    teamAImg,
+    teamBImg,
     date,
     startTime,
     venue,
