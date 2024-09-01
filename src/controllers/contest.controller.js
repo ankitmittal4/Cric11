@@ -43,44 +43,62 @@ const getContestById = asyncHandler(async (req, res) => {
   try {
     // console.log("req.params: ", req.params);
     const { id } = req.body;
-    const contest = await Contest.findById(id).populate(
-      "matchRef squadRef",
-      "matchType name teamA teamB startTime venue date squad"
-    );
-    // console.log("contest: ", contest.squadRef.squad);
 
-    // console.log("id: ", id);
-    // const contest = await Contest.aggregate([
-    //   {
-    //     $match: { _id: mongoose.Types.ObjectId(id) },
-    //   },
-    //   {
-    //     $lookup: {
-    //       from: "matches",
-    //       localField: "matchRef",
-    //       foreignField: "_id",
-    //       as: "match",
-    //     },
-    //   },
-    //   {
-    //     $unwind: "$match",
-    //   },
-    //   // {
-    //   //   $project: {
-    //   //     _id: 1,
-    //   //     prizePool: 1, // Include Contest name
-    //   //     entryFee: 1, // Include other Contest fields as needed
-    //   //     match: {
-    //   //       matchType: 1,
-    //   //       name: 1,
-    //   //       teamA: 1,
-    //   //       teamB: 1,
-    //   //       startTime: 1,
-    //   //       venue: 1,
-    //   //     },
-    //   //   },
-    //   // },
-    // ]);
+    //POPULATE
+    // const contest = await Contest.findById(id).populate(
+    //   "matchRef squadRef",
+    //   "matchType name teamA teamB startTime venue date squad"
+    // );
+
+    //AGGREGATION
+    const contest = await Contest.aggregate([
+      {
+        $match: { _id: new mongoose.Types.ObjectId(id) },
+      },
+      {
+        $lookup: {
+          from: "matches",
+          localField: "matchRef",
+          foreignField: "_id",
+          as: "matchData",
+        },
+      },
+      {
+        $unwind: "$matchData",
+      },
+      {
+        $lookup: {
+          from: "players",
+          localField: "squadRef",
+          foreignField: "_id",
+          as: "squadData",
+        },
+      },
+      {
+        $unwind: "$squadData",
+      },
+      {
+        $project: {
+          _id: 1,
+          prizePool: 1,
+          entryFee: 1,
+          maxParticipants: 1,
+          matchDetails: {
+            matchType: "$matchData.matchType",
+            name: "$matchData.name",
+            teamA: "$matchData.teamA",
+            teamB: "$matchData.teamB",
+            startTime: "$matchData.startTime",
+            date: "$matchData.date",
+            venue: "$matchData.venue",
+          },
+          squadDetails: {
+            squad: "$squadData.squad",
+          },
+        },
+      },
+    ]);
+    // console.log("contest: ", contest);
     if (!contest || contest.length === 0) {
       throw new ApiError(400, "Contest not found");
     }
@@ -89,7 +107,7 @@ const getContestById = asyncHandler(async (req, res) => {
       .json(
         new ApiResponse(
           200,
-          contest,
+          contest[0],
           "Contest with given id fetched successfully"
         )
       );
@@ -125,11 +143,16 @@ const createContest = asyncHandler(async (req, res) => {
   const matchDateGMT = new Date(matchTimeGMT);
   const ISTOffset = 5.5 * 60 * 60 * 1000;
   const matchTimeIST = new Date(matchDateGMT.getTime() + ISTOffset);
-
   const matchDate = matchTimeGMT.slice(0, 10);
   const matchTimeISTStr = matchTimeIST.toTimeString().slice(0, 8);
   const date = matchDate;
   const startTime = matchTimeISTStr;
+
+  const formattedIST = `${matchDate}T${startTime}Z`;
+
+  // console.log("matchTimeIST: ", matchTimeIST);
+  // console.log("matchTimeISTStr: ", matchTimeISTStr);
+  // console.log("formattedIST: ", formattedIST);
 
   if (
     [matchId, name, matchType, teamA, teamB, startTime, date, venue].some(
@@ -196,17 +219,27 @@ const createContest = asyncHandler(async (req, res) => {
 
 const deleteContest = asyncHandler(async (req, res) => {
   try {
-    // console.log("req.params: ", req.body);
-    // const { id } = req.params;
-
     const { id } = req.body;
-    // console.log("id: ", id);
+
     const removedContest = await Contest.findByIdAndDelete(id);
-    // console.log("removed contest: ", removedContest);
+
+    // console.log("removedContest: ", removedContest);
 
     if (!removedContest) {
       throw new ApiError(400, "Removed Contest not found");
     }
+
+    const removedMatch = await Match.findByIdAndDelete(removedContest.matchRef);
+    const removedSquad = await Player.findByIdAndDelete(
+      removedContest.squadRef
+    );
+    if (!removedMatch || !removedSquad) {
+      throw new ApiError(
+        400,
+        "Match and Players with corresponding contest not found"
+      );
+    }
+
     res
       .status(200)
       .json(

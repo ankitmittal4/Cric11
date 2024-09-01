@@ -84,7 +84,7 @@ const getAllUserContests = asyncHandler(async (req, res) => {
         },
       },
     ]);
-    console.log("All userContests: ", userContests);
+    // console.log("All userContests: ", userContests);
     if (!userContests || userContests.length === 0) {
       return res
         .status(404)
@@ -169,8 +169,8 @@ const getUserContestsById = asyncHandler(async (req, res) => {
           },
           userContestData: "$userContestData",
           matchData: "$matchData",
-          captain: "$captain", // Add this line to include captain in the projection
-          viceCaptain: "$viceCaptain", // Add this line to include captain in the projection
+          captain: "$captain",
+          viceCaptain: "$viceCaptain",
         },
       },
       {
