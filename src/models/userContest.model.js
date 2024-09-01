@@ -35,6 +35,14 @@ const userContestSchema = new Schema(
       ref: "Player",
       required: true,
     },
+    points: {
+      type: Number,
+      default: 0,
+    },
+    result: {
+      type: String,
+      default: null,
+    },
   },
   { timestamps: true }
 );
