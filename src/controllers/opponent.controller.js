@@ -6,6 +6,7 @@ import mongoose from "mongoose";
 
 const createOpponent = asyncHandler(async (req, res) => {
   const { contestId, user_id } = req.body;
+  // console.log("user_id: ", user_id);
 
   try {
     let opponent = await Opponent.findOne({ contestId });
