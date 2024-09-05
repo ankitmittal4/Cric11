@@ -50,5 +50,9 @@ const createOpponent = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Error while creating/updating Opponent");
   }
 });
+const getOpponent = asyncHandler(async (req, res) => {
+  const { contestId, user_id } = req.body;
+  console.log("user_id: ", user_id);
+});
 
 export { createOpponent };
