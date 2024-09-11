@@ -172,6 +172,7 @@ const getUserContestsById = asyncHandler(async (req, res) => {
           captain: "$captain",
           viceCaptain: "$viceCaptain",
           userId: "$userId",
+          contestId: "$contestId",
         },
       },
       {
@@ -185,6 +186,7 @@ const getUserContestsById = asyncHandler(async (req, res) => {
           captain: "$captain", // Include captain here as well
           viceCaptain: "$viceCaptain", // Include captain here as well
           userId: "$userId",
+          contestId: "$contestId",
         },
       },
       {
@@ -219,6 +221,7 @@ const getUserContestsById = asyncHandler(async (req, res) => {
           userId: 1,
           captain: 1, // Keep this line to ensure captain is in the final response
           viceCaptain: 1,
+          contestId: 1,
         },
       },
     ]);

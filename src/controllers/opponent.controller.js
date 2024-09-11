@@ -52,8 +52,6 @@ const createOpponent = asyncHandler(async (req, res) => {
 });
 const getOpponent = asyncHandler(async (req, res) => {
   const { contestId, user_id } = req.body;
-  console.log("contestId: ", contestId);
-  console.log("user_id: ", user_id);
 
   try {
     const opponent = await Opponent.aggregate([
