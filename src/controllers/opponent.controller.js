@@ -2,7 +2,7 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { Opponent } from "../models/opponent.model.js";
-import mongoose from "mongoose";
+import mongoose, { Mongoose } from "mongoose";
 
 const createOpponent = asyncHandler(async (req, res) => {
   const { contestId, user_id } = req.body;
@@ -52,7 +52,59 @@ const createOpponent = asyncHandler(async (req, res) => {
 });
 const getOpponent = asyncHandler(async (req, res) => {
   const { contestId, user_id } = req.body;
+  console.log("contestId: ", contestId);
   console.log("user_id: ", user_id);
+
+  try {
+    const opponent = await Opponent.aggregate([
+      {
+        $match: {
+          contestId: new mongoose.Types.ObjectId(contestId),
+        },
+      },
+      {
+        $unwind: "$opponents",
+      },
+      {
+        $match: {
+          opponents: new mongoose.Types.ObjectId(user_id),
+        },
+      },
+      {
+        $project: {
+          opponent: {
+            $arrayElemAt: [
+              {
+                $filter: {
+                  input: "$opponents",
+                  as: "opponent",
+                  cond: {
+                    $ne: ["$$opponent", new mongoose.Types.ObjectId(user_id)],
+                  },
+                },
+              },
+              0,
+            ],
+          },
+        },
+      },
+    ]);
+    console.log("Opponent: ", opponent);
+
+    if (!opponent[0].opponent) {
+      return res
+        .status(404)
+        .json({ message: "No opponent found for this user id." });
+    }
+    res
+      .status(200)
+      .json(
+        new ApiResponse(200, opponent[0], "user opponent fetched successfully")
+      );
+  } catch (error) {
+    console.log("error: ", error);
+    throw new ApiError(500, "Error while fetching user opponent");
+  }
 });
 
-export { createOpponent };
+export { createOpponent, getOpponent };
