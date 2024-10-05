@@ -84,6 +84,7 @@ const getOpponent = asyncHandler(async (req, res) => {
               0,
             ],
           },
+          contestId: 1,
         },
       },
     ]);
