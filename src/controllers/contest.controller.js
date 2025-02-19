@@ -130,14 +130,13 @@ const createContest = asyncHandler(async (req, res) => {
   const matchInfoApiEndpoint = "match_info";
   const matchInfoApiUrl = `${process.env.API_URL}${matchInfoApiEndpoint}?apikey=${process.env.API_KEY}&id=${matchId}`;
   const matchInfo = await axios.get(matchInfoApiUrl);
-  // console.log("matchInfo: ", matchInfo.data.data);
-  const { name, matchType, venue, teams, dateTimeGMT, teamInfo } =
-    matchInfo.data.data;
+  //   console.log("matchInfo: ", matchInfo.data.data);
+  const { name, matchType, venue, teams, dateTimeGMT } = matchInfo?.data?.data;
   const teamA = teams[0];
   const teamB = teams[1];
-  const teamAImg = teamInfo[0].img;
-  const teamBImg = teamInfo[1].img;
-
+  const teamAImg = matchInfo?.data?.data?.teamInfo?.[0]?.img;
+  const teamBImg = matchInfo?.data?.data?.teamInfo?.[1]?.img;
+  //   console.log("++++++++++++++++++++");
   //convert time
   const matchTimeGMT = dateTimeGMT;
   const matchDateGMT = new Date(matchTimeGMT);
@@ -181,8 +180,9 @@ const createContest = asyncHandler(async (req, res) => {
   //FIXME: players database call
   const matchSquadApiEndpoint = "match_squad";
   const matchSquadApiUrl = `${process.env.API_URL}${matchSquadApiEndpoint}?apikey=${process.env.API_KEY}&id=${matchId}`;
+
   const matchSquadInfo = await axios.get(matchSquadApiUrl);
-  // console.log("matchInfo: ", matchInfo.data.data);
+  //   console.log("matchInfo::: ", matchInfo.data.data);
   const { data } = matchSquadInfo.data;
 
   // if ([teamName, players].some((field) => field?.trim() === "")) {
