@@ -137,6 +137,7 @@ const createContest = asyncHandler(async (req, res) => {
   const teamAImg = matchInfo?.data?.data?.teamInfo?.[0]?.img;
   const teamBImg = matchInfo?.data?.data?.teamInfo?.[1]?.img;
   //   console.log("++++++++++++++++++++");
+  //   console.log("++++++++++++++++++++");
   //convert time
   const matchTimeGMT = dateTimeGMT;
   const matchDateGMT = new Date(matchTimeGMT);
