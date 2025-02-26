@@ -13,7 +13,7 @@ const playerSchema = new Schema(
         },
         players: [
           {
-            playerId: {
+            id: {
               type: String,
             },
             name: {
