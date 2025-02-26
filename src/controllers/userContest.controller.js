@@ -4,6 +4,7 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { UserContest } from "../models/userContest.model.js";
 import { Contest } from "../models/contest.model.js";
 import mongoose from "mongoose";
+import axios from "axios";
 const createUserContest = async (req, res) => {
   const { _id } = req.user;
   const contest = await Contest.findById(req.body.contestId);
@@ -209,7 +210,7 @@ const getUserContestsById = asyncHandler(async (req, res) => {
               input: "$players",
               as: "player",
               cond: {
-                $in: ["$$player._id", "$playersIds"],
+                $in: ["$$player.id", "$playersIds"],
               },
             },
           },
@@ -265,6 +266,30 @@ const updateUserContestsById = asyncHandler(async (req, res) => {
   try {
     const { id } = req.body;
     const userId = req.user.id;
+    console.log("+++++++++++++++");
+    //fetch match id using aggreagte of userContest
+    // const userContest = await UserContest.aggregate([
+    //   {
+    //     $match: { _id: new mongoose.Types.ObjectId(id) },
+    //   },
+    //   {
+    //     $lookup: {
+    //       from: "matches",
+    //       localField: "matchId",
+    //       foreignField: "_id",
+    //       as: "matchData",
+    //     },
+    //   },
+    //   {
+    //     $unwind: "$matchData",
+    //   },
+    //   {
+    //     $project: {
+    //       matchId: "$matchData.matchId",
+    //     },
+    //   },
+    // ]);
+
     const userContest = await UserContest.aggregate([
       {
         $match: { _id: new mongoose.Types.ObjectId(id) },
@@ -356,25 +381,76 @@ const updateUserContestsById = asyncHandler(async (req, res) => {
       },
       {
         $project: {
-          contestDetails: {
-            entryFee: "$userContestData.entryFee",
-            prizePool: "$userContestData.prizePool",
-            maxParticipants: "$userContestData.maxParticipants",
-          },
+          //   contestDetails: {
+          //     entryFee: "$userContestData.entryFee",
+          //     prizePool: "$userContestData.prizePool",
+          //     maxParticipants: "$userContestData.maxParticipants",
+          //   },
           user11: "$playing11",
           matchDetails: {
-            name: "$matchData.name",
-            teamA: "$matchData.teamA",
-            teamB: "$matchData.teamB",
-            matchType: "$matchData.matchType",
-            date: "$matchData.date",
-            startTime: "$matchData.startTime",
+            // name: "$matchData.name",
+            // teamA: "$matchData.teamA",
+            // teamB: "$matchData.teamB",
+            // matchType: "$matchData.matchType",
+            matchId: "$matchData.matchId",
+            // date: "$matchData.date",
+            // startTime: "$matchData.startTime",
           },
           captain: 1, // Keep this line to ensure captain is in the final response
           viceCaptain: 1,
         },
       },
     ]);
+    console.log("Update UserContest: ", userContest[0].user11);
+    console.log("Update UserContest: ", userContest[0].captain);
+    console.log("Update UserContest: ", userContest[0].viceCaptain);
+
+    //NOTE: fetch points from fantasy match points API
+    const matchId = userContest[0].matchDetails.matchId;
+    const fantasyMatchatchPointsEndPoint = "match_points";
+    const fantasyMatchPointsApiUrl = `${process.env.API_URL}${fantasyMatchatchPointsEndPoint}?apikey=${process.env.API_KEY}&id=${matchId}`;
+    try {
+      const fantasyPoints = await axios.get(fantasyMatchPointsApiUrl);
+      if (fantasyPoints.data.status === "success") {
+        console.log(fantasyPoints.data.data.totals);
+
+        //NOTE: matching both user11 and fantasy data to calculate match points
+        const fantasyData = fantasyPoints.data.data.totals;
+        const user11 = userContest[0].user11;
+        console.log("User11", user11);
+        const totalsLookup = fantasyData.reduce((acc, player) => {
+          acc[player.id] = player.points;
+          return acc;
+        }, {});
+
+        // Step 2: Calculate the sum of points for matching players
+        let totalPoints = 0;
+        user11.forEach((player) => {
+          const playerId = player._id.toString(); // Ensure _id is a string
+          if (totalsLookup[playerId]) {
+            totalPoints += totalsLookup[playerId];
+          }
+        });
+      } else {
+        console.log(
+          "Failure in getting api response: ",
+          fantasyPoints.data.reason
+        );
+      }
+    } catch {
+      console.log("Error in getting fantasy points");
+      throw new ApiError(500, "Error in getting fantasy points");
+    }
+    // if (
+    //   !(fantasyPoints.data.status === "success") ||
+    //   !fantasyPoints.data.data.length
+    // ) {
+    //   throw new ApiError(400, "Error while fetching fantasy points");
+    // }
+    // console.log("Match points: ", fantasyPoints.data.data.totals);
+
+    //FIXME: get user contest code
+
     // console.log("userContest: ", userContest);
     if (!userContest || userContest.length === 0) {
       return res
