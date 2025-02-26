@@ -110,13 +110,13 @@ const getUserContestsById = asyncHandler(async (req, res) => {
   try {
     // console.log(req.body);
     const { id } = req.body;
-    let userId;
-    if (req.body.userId) {
-      userId = req.body.userId;
-    } else {
-      userId = req.user.id;
-    }
-    // const userId = req.body.userId || req.user.id;
+    // let userId;
+    // if (req.body.userId) {
+    //   userId = req.body.userId;
+    // } else {
+    //   userId = req.user.id;
+    // }
+    const userId = req.user.id;
     console.log("User id: ", userId);
     const userContest = await UserContest.aggregate([
       {
