@@ -106,9 +106,18 @@ const getAllUserContests = asyncHandler(async (req, res) => {
 });
 
 const getUserContestsById = asyncHandler(async (req, res) => {
+  //   console.log("+++++++++++++++++");
   try {
+    // console.log(req.body);
     const { id } = req.body;
-    const userId = req.user.id;
+    let userId;
+    if (req.body.userId) {
+      userId = req.body.userId;
+    } else {
+      userId = req.user.id;
+    }
+    // const userId = req.body.userId || req.user.id;
+    console.log("User id: ", userId);
     const userContest = await UserContest.aggregate([
       {
         $match: { _id: new mongoose.Types.ObjectId(id) },
@@ -173,6 +182,8 @@ const getUserContestsById = asyncHandler(async (req, res) => {
           viceCaptain: "$viceCaptain",
           userId: "$userId",
           contestId: "$contestId",
+          points: "$points",
+          result: "$result",
         },
       },
       {
@@ -183,10 +194,12 @@ const getUserContestsById = asyncHandler(async (req, res) => {
           },
           userContestData: "$userContestData",
           matchData: "$matchData",
-          captain: "$captain", // Include captain here as well
-          viceCaptain: "$viceCaptain", // Include captain here as well
+          captain: "$captain",
+          viceCaptain: "$viceCaptain",
           userId: "$userId",
           contestId: "$contestId",
+          points: "$points",
+          result: "$result",
         },
       },
       {
@@ -219,14 +232,16 @@ const getUserContestsById = asyncHandler(async (req, res) => {
             startTime: "$matchData.startTime",
           },
           userId: 1,
-          captain: 1, // Keep this line to ensure captain is in the final response
+          captain: 1,
           viceCaptain: 1,
           contestId: 1,
+          points: "$points",
+          result: "$result",
         },
       },
     ]);
 
-    // console.log("userContest: ", userContest);
+    console.log("userContest: ", userContest);
     if (!userContest || userContest.length === 0) {
       return res
         .status(404)
