@@ -5,7 +5,7 @@ import { Opponent } from "../models/opponent.model.js";
 import mongoose, { Mongoose } from "mongoose";
 
 const createOpponent = asyncHandler(async (req, res) => {
-  const { contestId, user_id } = req.body;
+  const { contestId, userContestId } = req.body;
   // console.log("user_id: ", user_id);
 
   try {
@@ -16,14 +16,14 @@ const createOpponent = asyncHandler(async (req, res) => {
 
       for (let pair of opponent.opponents) {
         if (pair.length < 2) {
-          pair.push(user_id);
+          pair.push(userContestId);
           added = true;
           break;
         }
       }
 
       if (!added) {
-        opponent.opponents.push([user_id]);
+        opponent.opponents.push([userContestId]);
       }
 
       const updatedOpponent = await opponent.save();
@@ -35,7 +35,7 @@ const createOpponent = asyncHandler(async (req, res) => {
     } else {
       opponent = new Opponent({
         contestId,
-        opponents: [[user_id]],
+        opponents: [[userContestId]],
       });
 
       const savedOpponent = await opponent.save();
@@ -51,7 +51,7 @@ const createOpponent = asyncHandler(async (req, res) => {
   }
 });
 const getOpponent = asyncHandler(async (req, res) => {
-  const { contestId, user_id } = req.body;
+  const { contestId, userContestId } = req.body;
 
   try {
     const opponent = await Opponent.aggregate([
@@ -65,7 +65,7 @@ const getOpponent = asyncHandler(async (req, res) => {
       },
       {
         $match: {
-          opponents: new mongoose.Types.ObjectId(user_id),
+          opponents: new mongoose.Types.ObjectId(userContestId),
         },
       },
       {
@@ -77,7 +77,10 @@ const getOpponent = asyncHandler(async (req, res) => {
                   input: "$opponents",
                   as: "opponent",
                   cond: {
-                    $ne: ["$$opponent", new mongoose.Types.ObjectId(user_id)],
+                    $ne: [
+                      "$$opponent",
+                      new mongoose.Types.ObjectId(userContestId),
+                    ],
                   },
                 },
               },
@@ -88,7 +91,7 @@ const getOpponent = asyncHandler(async (req, res) => {
         },
       },
     ]);
-    console.log("Opponent: ", opponent);
+    // console.log("Opponent: ", opponent);
 
     if (!opponent[0].opponent) {
       return res
