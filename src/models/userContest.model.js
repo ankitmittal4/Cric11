@@ -20,18 +20,18 @@ const userContestSchema = new Schema(
     },
     players: [
       {
-        type: Schema.Types.ObjectId,
+        type: String,
         ref: "Player",
         required: true,
       },
     ],
     captain: {
-      type: Schema.Types.ObjectId,
+      type: String,
       ref: "Player",
       required: true,
     },
     viceCaptain: {
-      type: Schema.Types.ObjectId,
+      type: String,
       ref: "Player",
       required: true,
     },
