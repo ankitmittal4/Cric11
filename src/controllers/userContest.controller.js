@@ -370,13 +370,13 @@ const updateUserContestsById = asyncHandler(async (req, res) => {
           },
           user11: "$playing11",
           matchDetails: {
-            // name: "$matchData.name",
-            // teamA: "$matchData.teamA",
-            // teamB: "$matchData.teamB",
-            // matchType: "$matchData.matchType",
+            name: "$matchData.name",
+            teamA: "$matchData.teamA",
+            teamB: "$matchData.teamB",
+            matchType: "$matchData.matchType",
             matchId: "$matchData.matchId",
-            // date: "$matchData.date",
-            // startTime: "$matchData.startTime",
+            date: "$matchData.date",
+            startTime: "$matchData.startTime",
           },
           captain: 1, // Keep this line to ensure captain is in the final response
           viceCaptain: 1,
@@ -447,6 +447,8 @@ const updateUserContestsById = asyncHandler(async (req, res) => {
           matchData: "$matchData",
           captain: "$captain",
           viceCaptain: "$viceCaptain",
+          points: "$points",
+          result: "$result",
         },
       },
       {
@@ -457,8 +459,10 @@ const updateUserContestsById = asyncHandler(async (req, res) => {
           },
           userContestData: "$userContestData",
           matchData: "$matchData",
-          captain: "$captain", // Include captain here as well
-          viceCaptain: "$viceCaptain", // Include captain here as well
+          captain: "$captain",
+          viceCaptain: "$viceCaptain",
+          points: "$points",
+          result: "$result",
         },
       },
       {
@@ -476,11 +480,11 @@ const updateUserContestsById = asyncHandler(async (req, res) => {
       },
       {
         $project: {
-          //   contestDetails: {
-          //     entryFee: "$userContestData.entryFee",
-          //     prizePool: "$userContestData.prizePool",
-          //     maxParticipants: "$userContestData.maxParticipants",
-          //   },
+          contestDetails: {
+            entryFee: "$userContestData.entryFee",
+            prizePool: "$userContestData.prizePool",
+            maxParticipants: "$userContestData.maxParticipants",
+          },
           user11: "$playing11",
           matchDetails: {
             // name: "$matchData.name",
@@ -493,6 +497,8 @@ const updateUserContestsById = asyncHandler(async (req, res) => {
           },
           captain: 1, // Keep this line to ensure captain is in the final response
           viceCaptain: 1,
+          points: "$points",
+          result: "$result",
         },
       },
     ]);
