@@ -264,12 +264,130 @@ const getUserContestsById = asyncHandler(async (req, res) => {
 });
 const updateUserContestsById = asyncHandler(async (req, res) => {
   try {
-    const { id } = req.body;
+    const { id, opponentId } = req.body;
     const userId = req.user.id;
+    console.log("opponentId: ", opponentId);
 
     const userContest = await UserContest.aggregate([
       {
         $match: { _id: new mongoose.Types.ObjectId(id) },
+      },
+      {
+        $lookup: {
+          from: "contests",
+          localField: "contestId",
+          foreignField: "_id",
+          as: "userContestData",
+        },
+      },
+      {
+        $unwind: "$userContestData",
+      },
+      {
+        $lookup: {
+          from: "matches",
+          localField: "matchId",
+          foreignField: "_id",
+          as: "matchData",
+        },
+      },
+      {
+        $unwind: "$matchData",
+      },
+      {
+        $lookup: {
+          from: "players",
+          let: { squadId: "$userContestData.squadRef" },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    {
+                      $eq: ["$_id", "$$squadId"],
+                    },
+                  ],
+                },
+              },
+            },
+          ],
+          as: "squad",
+        },
+      },
+      {
+        $unwind: "$squad",
+      },
+      {
+        $project: {
+          playersIds: "$players",
+          team1: {
+            $arrayElemAt: ["$squad.squad", 0],
+          },
+          team2: {
+            $arrayElemAt: ["$squad.squad", 1],
+          },
+          userContestData: "$userContestData",
+          matchData: "$matchData",
+          captain: "$captain",
+          viceCaptain: "$viceCaptain",
+          points: "$points",
+          result: "$result",
+        },
+      },
+      {
+        $project: {
+          playersIds: "$playersIds",
+          players: {
+            $concatArrays: ["$team1.players", "$team2.players"],
+          },
+          userContestData: "$userContestData",
+          matchData: "$matchData",
+          captain: "$captain", // Include captain here as well
+          viceCaptain: "$viceCaptain", // Include captain here as well
+          points: "$points",
+          result: "$result",
+        },
+      },
+      {
+        $addFields: {
+          playing11: {
+            $filter: {
+              input: "$players",
+              as: "player",
+              cond: {
+                $in: ["$$player.id", "$playersIds"],
+              },
+            },
+          },
+        },
+      },
+      {
+        $project: {
+          contestDetails: {
+            entryFee: "$userContestData.entryFee",
+            prizePool: "$userContestData.prizePool",
+            maxParticipants: "$userContestData.maxParticipants",
+          },
+          user11: "$playing11",
+          matchDetails: {
+            // name: "$matchData.name",
+            // teamA: "$matchData.teamA",
+            // teamB: "$matchData.teamB",
+            // matchType: "$matchData.matchType",
+            matchId: "$matchData.matchId",
+            // date: "$matchData.date",
+            // startTime: "$matchData.startTime",
+          },
+          captain: 1, // Keep this line to ensure captain is in the final response
+          viceCaptain: 1,
+          points: "$points",
+          result: "$result",
+        },
+      },
+    ]);
+    const opponentContest = await UserContest.aggregate([
+      {
+        $match: { _id: new mongoose.Types.ObjectId(opponentId) },
       },
       {
         $lookup: {
@@ -378,7 +496,9 @@ const updateUserContestsById = asyncHandler(async (req, res) => {
         },
       },
     ]);
-    // console.log("Update UserContest: ", userContest[0].user11);
+    console.log("User Contest: ", userContest[0]);
+    console.log("Opponent Contest: ", opponentContest[0]);
+
     // console.log("Update UserContest: ", userContest[0].captain);
     // console.log("Update UserContest: ", userContest[0].viceCaptain);
 
@@ -386,42 +506,145 @@ const updateUserContestsById = asyncHandler(async (req, res) => {
     const matchId = userContest[0].matchDetails.matchId;
     const fantasyMatchatchPointsEndPoint = "match_points";
     const fantasyMatchPointsApiUrl = `${process.env.API_URL}${fantasyMatchatchPointsEndPoint}?apikey=${process.env.API_KEY}&id=${matchId}`;
+
+    const matchInfoApiEndpoint = "match_info";
+    const matchInfoApiUrl = `${process.env.API_URL}${matchInfoApiEndpoint}?apikey=${process.env.API_KEY}&id=${matchId}`;
+
     try {
+      //   const matchInfo = await axios.get(matchInfoApiUrl);
+      //   const isMatchEnded = matchInfo.data.data.matchEnded;
+      const isMatchEnded = false;
+
       const fantasyPoints = await axios.get(fantasyMatchPointsApiUrl);
+
       if (fantasyPoints.data.status === "success") {
         // console.log(fantasyPoints.data.data.totals);
 
         //NOTE: matching both user11 and fantasy data to calculate match points
         const fantasyData = fantasyPoints.data.data.totals;
         const user11 = userContest[0].user11;
+        const opponent11 = opponentContest[0].user11;
         // console.log("User11", user11);
+        // console.log("Opponent11", opponent11);
         const fantasyDataLookup = fantasyData.reduce((acc, player) => {
           acc[player.id] = player.points;
           return acc;
         }, {});
-
         //Calculate the sum of points for matching players
-        let totalPoints = 0;
+        let totalPointsOfUser = 0;
+        let totalPointsOfOpponent = 0;
         user11.forEach((player) => {
           const playerId = player.id.toString();
           if (fantasyDataLookup[playerId]) {
-            totalPoints += fantasyDataLookup[playerId];
+            // console.log("User Player: ", fantasyDataLookup[playerId]);
+            totalPointsOfUser += fantasyDataLookup[playerId];
           }
         });
-        console.log("Total Points: ", totalPoints);
+        opponent11.forEach((player) => {
+          const playerId = player.id.toString();
+          if (fantasyDataLookup[playerId]) {
+            // console.log("User Player: ", fantasyDataLookup[playerId]);
+            totalPointsOfOpponent += fantasyDataLookup[playerId];
+          }
+        });
+        console.log("++++++++++++++++++++++");
         //update points in database
-        const updateUserContest = await UserContest.findByIdAndUpdate(
-          id,
+        // let userResult;
+        // let opponentResult;
+        // if (isMatchEnded) {
+        //   if (totalPointsOfUser > totalPointsOfOpponent) {
+        //     userResult = "win";
+        //     opponentResult = "loose";
+        //   } else {
+        //     userResult = "loose";
+        //     opponentResult = "win";
+        //   }
+        // }
+        // // await UserContest.findByIdAndUpdate(
+        // await UserContest.bulkWrite([
+        //     {
+        //     updateOne: {
+        //         filter: { _id: id },
+
+        //         update: {
+        //         $set: {
+        //             points: totalPointsOfUser,
+        //             result: {
+        //             $cond: {
+        //                 if: isMatchEnded,
+        //                 then: userResult,
+        //                 else: "$result",
+        //             },
+        //             },
+        //         },
+        //         },
+        //     },
+        //     },
+        //     {
+        //     updateOne: {
+        //         filter: { _id: opponentId },
+        //         update: {
+        //         $set: {
+        //             points: totalPointsOfOpponent,
+        //             result: {
+        //             $cond: {
+        //                 if: isMatchEnded,
+        //                 then: opponentResult,
+        //                 else: "$result",
+        //             },
+        //             },
+        //         },
+        //         },
+        //     },
+        //     },
+        // ]);
+        await UserContest.bulkWrite([
           {
-            $set: {
-              points: totalPoints,
+            updateOne: {
+              filter: { _id: id },
+
+              update: {
+                $set: {
+                  points: totalPointsOfUser,
+                },
+              },
             },
           },
           {
-            new: true,
-          }
-        );
-        console.log("updateUserContest: ", UserContest);
+            updateOne: {
+              filter: { _id: opponentId },
+              update: {
+                $set: {
+                  points: totalPointsOfOpponent,
+                },
+              },
+            },
+          },
+        ]);
+        //   id,
+        //   {
+        //     $set: {
+        //       points: totalPointsOfUser,
+        //     },
+        //   },
+        //   {
+        //     new: true,
+        //   }
+        // );
+        // await UserContest.findByIdAndUpdate(
+        //   opponentId,
+        //   {
+        //     $set: {
+        //       points: totalPointsOfOpponent,
+        //     },
+        //   },
+        //   {
+        //     new: true,
+        //   }
+        // );
+        // console.log("updateUserContest: ", UserContest);
+        console.log("Total Points of user: ", totalPointsOfUser);
+        console.log("Total Points of opponent: ", totalPointsOfOpponent);
       } else {
         console.log(
           "Failure in getting api response: ",
@@ -446,7 +669,7 @@ const updateUserContestsById = asyncHandler(async (req, res) => {
       .json(
         new ApiResponse(
           200,
-          userContest,
+          { userContest, opponentContest },
           "user contest with given id fetched successfully"
         )
       );
