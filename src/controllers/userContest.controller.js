@@ -266,7 +266,6 @@ const updateUserContestsById = asyncHandler(async (req, res) => {
   try {
     const { id, opponentId } = req.body;
     const userId = req.user.id;
-    console.log("opponentId: ", opponentId);
 
     const userContest = await UserContest.aggregate([
       {
@@ -502,8 +501,8 @@ const updateUserContestsById = asyncHandler(async (req, res) => {
         },
       },
     ]);
-    console.log("User Contest: ", userContest[0]);
-    console.log("Opponent Contest: ", opponentContest[0]);
+    // console.log("User Contest: ", userContest[0]);
+    // console.log("Opponent Contest: ", opponentContest[0]);
 
     // console.log("Update UserContest: ", userContest[0].captain);
     // console.log("Update UserContest: ", userContest[0].viceCaptain);
@@ -517,9 +516,8 @@ const updateUserContestsById = asyncHandler(async (req, res) => {
     const matchInfoApiUrl = `${process.env.API_URL}${matchInfoApiEndpoint}?apikey=${process.env.API_KEY}&id=${matchId}`;
 
     try {
-      //   const matchInfo = await axios.get(matchInfoApiUrl);
-      //   const isMatchEnded = matchInfo.data.data.matchEnded;
-      const isMatchEnded = false;
+      const matchInfo = await axios.get(matchInfoApiUrl);
+      const isMatchEnded = matchInfo.data.data.matchEnded;
 
       const fantasyPoints = await axios.get(fantasyMatchPointsApiUrl);
 
@@ -530,8 +528,6 @@ const updateUserContestsById = asyncHandler(async (req, res) => {
         const fantasyData = fantasyPoints.data.data.totals;
         const user11 = userContest[0].user11;
         const opponent11 = opponentContest[0].user11;
-        // console.log("User11", user11);
-        // console.log("Opponent11", opponent11);
         const fantasyDataLookup = fantasyData.reduce((acc, player) => {
           acc[player.id] = player.points;
           return acc;
@@ -542,68 +538,28 @@ const updateUserContestsById = asyncHandler(async (req, res) => {
         user11.forEach((player) => {
           const playerId = player.id.toString();
           if (fantasyDataLookup[playerId]) {
-            // console.log("User Player: ", fantasyDataLookup[playerId]);
             totalPointsOfUser += fantasyDataLookup[playerId];
           }
         });
         opponent11.forEach((player) => {
           const playerId = player.id.toString();
           if (fantasyDataLookup[playerId]) {
-            // console.log("User Player: ", fantasyDataLookup[playerId]);
             totalPointsOfOpponent += fantasyDataLookup[playerId];
           }
         });
-        console.log("++++++++++++++++++++++");
-        //update points in database
-        // let userResult;
-        // let opponentResult;
-        // if (isMatchEnded) {
-        //   if (totalPointsOfUser > totalPointsOfOpponent) {
-        //     userResult = "win";
-        //     opponentResult = "loose";
-        //   } else {
-        //     userResult = "loose";
-        //     opponentResult = "win";
-        //   }
-        // }
-        // // await UserContest.findByIdAndUpdate(
-        // await UserContest.bulkWrite([
-        //     {
-        //     updateOne: {
-        //         filter: { _id: id },
+        //update points and result in database
+        let userResult;
+        let opponentResult;
+        if (isMatchEnded) {
+          if (totalPointsOfUser > totalPointsOfOpponent) {
+            userResult = "win";
+            opponentResult = "loose";
+          } else {
+            userResult = "loose";
+            opponentResult = "win";
+          }
+        }
 
-        //         update: {
-        //         $set: {
-        //             points: totalPointsOfUser,
-        //             result: {
-        //             $cond: {
-        //                 if: isMatchEnded,
-        //                 then: userResult,
-        //                 else: "$result",
-        //             },
-        //             },
-        //         },
-        //         },
-        //     },
-        //     },
-        //     {
-        //     updateOne: {
-        //         filter: { _id: opponentId },
-        //         update: {
-        //         $set: {
-        //             points: totalPointsOfOpponent,
-        //             result: {
-        //             $cond: {
-        //                 if: isMatchEnded,
-        //                 then: opponentResult,
-        //                 else: "$result",
-        //             },
-        //             },
-        //         },
-        //         },
-        //     },
-        //     },
-        // ]);
         await UserContest.bulkWrite([
           {
             updateOne: {
@@ -612,6 +568,7 @@ const updateUserContestsById = asyncHandler(async (req, res) => {
               update: {
                 $set: {
                   points: totalPointsOfUser,
+                  result: isMatchEnded ? userResult : null,
                 },
               },
             },
@@ -622,35 +579,268 @@ const updateUserContestsById = asyncHandler(async (req, res) => {
               update: {
                 $set: {
                   points: totalPointsOfOpponent,
+                  result: isMatchEnded ? opponentResult : null,
                 },
               },
             },
           },
         ]);
-        //   id,
-        //   {
-        //     $set: {
-        //       points: totalPointsOfUser,
-        //     },
-        //   },
-        //   {
-        //     new: true,
-        //   }
-        // );
-        // await UserContest.findByIdAndUpdate(
-        //   opponentId,
-        //   {
-        //     $set: {
-        //       points: totalPointsOfOpponent,
-        //     },
-        //   },
-        //   {
-        //     new: true,
-        //   }
-        // );
-        // console.log("updateUserContest: ", UserContest);
-        console.log("Total Points of user: ", totalPointsOfUser);
-        console.log("Total Points of opponent: ", totalPointsOfOpponent);
+
+        const updatedUserContest = await UserContest.aggregate([
+          {
+            $match: { _id: new mongoose.Types.ObjectId(id) },
+          },
+          {
+            $lookup: {
+              from: "contests",
+              localField: "contestId",
+              foreignField: "_id",
+              as: "userContestData",
+            },
+          },
+          {
+            $unwind: "$userContestData",
+          },
+          {
+            $lookup: {
+              from: "matches",
+              localField: "matchId",
+              foreignField: "_id",
+              as: "matchData",
+            },
+          },
+          {
+            $unwind: "$matchData",
+          },
+          {
+            $lookup: {
+              from: "players",
+              let: { squadId: "$userContestData.squadRef" },
+              pipeline: [
+                {
+                  $match: {
+                    $expr: {
+                      $and: [
+                        {
+                          $eq: ["$_id", "$$squadId"],
+                        },
+                      ],
+                    },
+                  },
+                },
+              ],
+              as: "squad",
+            },
+          },
+          {
+            $unwind: "$squad",
+          },
+          {
+            $project: {
+              playersIds: "$players",
+              team1: {
+                $arrayElemAt: ["$squad.squad", 0],
+              },
+              team2: {
+                $arrayElemAt: ["$squad.squad", 1],
+              },
+              userContestData: "$userContestData",
+              matchData: "$matchData",
+              captain: "$captain",
+              viceCaptain: "$viceCaptain",
+              points: "$points",
+              result: "$result",
+            },
+          },
+          {
+            $project: {
+              playersIds: "$playersIds",
+              players: {
+                $concatArrays: ["$team1.players", "$team2.players"],
+              },
+              userContestData: "$userContestData",
+              matchData: "$matchData",
+              captain: "$captain", // Include captain here as well
+              viceCaptain: "$viceCaptain", // Include captain here as well
+              points: "$points",
+              result: "$result",
+            },
+          },
+          {
+            $addFields: {
+              playing11: {
+                $filter: {
+                  input: "$players",
+                  as: "player",
+                  cond: {
+                    $in: ["$$player.id", "$playersIds"],
+                  },
+                },
+              },
+            },
+          },
+          {
+            $project: {
+              contestDetails: {
+                entryFee: "$userContestData.entryFee",
+                prizePool: "$userContestData.prizePool",
+                maxParticipants: "$userContestData.maxParticipants",
+              },
+              user11: "$playing11",
+              matchDetails: {
+                name: "$matchData.name",
+                teamA: "$matchData.teamA",
+                teamB: "$matchData.teamB",
+                matchType: "$matchData.matchType",
+                matchId: "$matchData.matchId",
+                date: "$matchData.date",
+                startTime: "$matchData.startTime",
+              },
+              captain: 1, // Keep this line to ensure captain is in the final response
+              viceCaptain: 1,
+              points: "$points",
+              result: "$result",
+            },
+          },
+        ]);
+        const updatedOpponentContest = await UserContest.aggregate([
+          {
+            $match: { _id: new mongoose.Types.ObjectId(opponentId) },
+          },
+          {
+            $lookup: {
+              from: "contests",
+              localField: "contestId",
+              foreignField: "_id",
+              as: "userContestData",
+            },
+          },
+          {
+            $unwind: "$userContestData",
+          },
+          {
+            $lookup: {
+              from: "matches",
+              localField: "matchId",
+              foreignField: "_id",
+              as: "matchData",
+            },
+          },
+          {
+            $unwind: "$matchData",
+          },
+          {
+            $lookup: {
+              from: "players",
+              let: { squadId: "$userContestData.squadRef" },
+              pipeline: [
+                {
+                  $match: {
+                    $expr: {
+                      $and: [
+                        {
+                          $eq: ["$_id", "$$squadId"],
+                        },
+                      ],
+                    },
+                  },
+                },
+              ],
+              as: "squad",
+            },
+          },
+          {
+            $unwind: "$squad",
+          },
+          {
+            $project: {
+              playersIds: "$players",
+              team1: {
+                $arrayElemAt: ["$squad.squad", 0],
+              },
+              team2: {
+                $arrayElemAt: ["$squad.squad", 1],
+              },
+              userContestData: "$userContestData",
+              matchData: "$matchData",
+              captain: "$captain",
+              viceCaptain: "$viceCaptain",
+              points: "$points",
+              result: "$result",
+            },
+          },
+          {
+            $project: {
+              playersIds: "$playersIds",
+              players: {
+                $concatArrays: ["$team1.players", "$team2.players"],
+              },
+              userContestData: "$userContestData",
+              matchData: "$matchData",
+              captain: "$captain",
+              viceCaptain: "$viceCaptain",
+              points: "$points",
+              result: "$result",
+            },
+          },
+          {
+            $addFields: {
+              playing11: {
+                $filter: {
+                  input: "$players",
+                  as: "player",
+                  cond: {
+                    $in: ["$$player.id", "$playersIds"],
+                  },
+                },
+              },
+            },
+          },
+          {
+            $project: {
+              contestDetails: {
+                entryFee: "$userContestData.entryFee",
+                prizePool: "$userContestData.prizePool",
+                maxParticipants: "$userContestData.maxParticipants",
+              },
+              user11: "$playing11",
+              matchDetails: {
+                // name: "$matchData.name",
+                // teamA: "$matchData.teamA",
+                // teamB: "$matchData.teamB",
+                // matchType: "$matchData.matchType",
+                matchId: "$matchData.matchId",
+                // date: "$matchData.date",
+                // startTime: "$matchData.startTime",
+              },
+              captain: 1, // Keep this line to ensure captain is in the final response
+              viceCaptain: 1,
+              points: "$points",
+              result: "$result",
+            },
+          },
+        ]);
+        // console.log("userContest: ", updatedUserContest);
+        // console.log("opponentContest: ", updatedOpponentContest);
+        if (
+          !updatedUserContest ||
+          updatedUserContest.length === 0 ||
+          !updatedOpponentContest ||
+          updatedOpponentContest.length === 0
+        ) {
+          return res.status(404).json({
+            message: "No contests found for this user with given id.",
+          });
+        }
+        res
+          .status(200)
+          .json(
+            new ApiResponse(
+              200,
+              { updatedUserContest, updatedOpponentContest },
+              "user contest with given id fetched successfully"
+            )
+          );
       } else {
         console.log(
           "Failure in getting api response: ",
@@ -661,24 +851,6 @@ const updateUserContestsById = asyncHandler(async (req, res) => {
       console.log("Error in getting fantasy points");
       throw new ApiError(500, "Error in getting fantasy points");
     }
-
-    //FIXME: get user contest code
-
-    // console.log("userContest: ", userContest);
-    if (!userContest || userContest.length === 0) {
-      return res
-        .status(404)
-        .json({ message: "No contests found for this user with given id." });
-    }
-    res
-      .status(200)
-      .json(
-        new ApiResponse(
-          200,
-          { userContest, opponentContest },
-          "user contest with given id fetched successfully"
-        )
-      );
   } catch (error) {
     console.log("error: ", error);
     throw new ApiError(500, "Error while fetching user contest with given id");
