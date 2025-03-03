@@ -501,11 +501,6 @@ const updateUserContestsById = asyncHandler(async (req, res) => {
         },
       },
     ]);
-    // console.log("User Contest: ", userContest[0]);
-    // console.log("Opponent Contest: ", opponentContest[0]);
-
-    // console.log("Update UserContest: ", userContest[0].captain);
-    // console.log("Update UserContest: ", userContest[0].viceCaptain);
 
     //NOTE: fetch points from fantasy match points API
     const matchId = userContest[0].matchDetails.matchId;
@@ -519,8 +514,21 @@ const updateUserContestsById = asyncHandler(async (req, res) => {
       const matchInfo = await axios.get(matchInfoApiUrl);
       const isMatchEnded = matchInfo.data.data.matchEnded;
 
-      const fantasyPoints = await axios.get(fantasyMatchPointsApiUrl);
+      //NOTE: if match ended then show the details do not call the api again to calculate points
+      if (isMatchEnded) {
+        return res.status(200).json(
+          new ApiResponse(
+            200,
+            {
+              updatedUserContest: userContest,
+              updatedOpponentContest: opponentContest,
+            },
+            "user contest with given id fetched successfully"
+          )
+        );
+      }
 
+      const fantasyPoints = await axios.get(fantasyMatchPointsApiUrl);
       if (fantasyPoints.data.status === "success") {
         // console.log(fantasyPoints.data.data.totals);
 
@@ -538,13 +546,25 @@ const updateUserContestsById = asyncHandler(async (req, res) => {
         user11.forEach((player) => {
           const playerId = player.id.toString();
           if (fantasyDataLookup[playerId]) {
-            totalPointsOfUser += fantasyDataLookup[playerId];
+            if (playerId === userContest[0].captain) {
+              totalPointsOfUser += 2 * fantasyDataLookup[playerId];
+            } else if (playerId === userContest[0].viceCaptain) {
+              totalPointsOfUser += 1.5 * fantasyDataLookup[playerId];
+            } else {
+              totalPointsOfUser += fantasyDataLookup[playerId];
+            }
           }
         });
         opponent11.forEach((player) => {
           const playerId = player.id.toString();
           if (fantasyDataLookup[playerId]) {
-            totalPointsOfOpponent += fantasyDataLookup[playerId];
+            if (playerId === opponentContest[0].captain) {
+              totalPointsOfOpponent += 2 * fantasyDataLookup[playerId];
+            } else if (playerId === opponentContest[0].viceCaptain) {
+              totalPointsOfOpponent += 1.5 * fantasyDataLookup[playerId];
+            } else {
+              totalPointsOfOpponent += fantasyDataLookup[playerId];
+            }
           }
         });
         //update points and result in database
