@@ -35,6 +35,157 @@ const createUserContest = async (req, res) => {
     throw new ApiError(400, "Error while creating user Contests");
   }
 };
+
+const updateTeam = asyncHandler(async (req, res) => {
+  const { _id } = req.user;
+  //   const contest = await Contest.findById(req.body.contestId);
+  const { id, players, captain, viceCaptain } = req.body;
+
+  try {
+    const updateTeam = await UserContest.findByIdAndUpdate(
+      id,
+      {
+        $set: {
+          players: players,
+          captain: captain,
+          viceCaptain: viceCaptain,
+        },
+      },
+      { new: true }
+    );
+    console.log("Update Team", updateTeam);
+    const userContest = await UserContest.aggregate([
+      {
+        $match: { _id: new mongoose.Types.ObjectId(id) },
+      },
+      {
+        $lookup: {
+          from: "contests",
+          localField: "contestId",
+          foreignField: "_id",
+          as: "userContestData",
+        },
+      },
+      {
+        $unwind: "$userContestData",
+      },
+      {
+        $lookup: {
+          from: "matches",
+          localField: "matchId",
+          foreignField: "_id",
+          as: "matchData",
+        },
+      },
+      {
+        $unwind: "$matchData",
+      },
+      {
+        $lookup: {
+          from: "players",
+          let: { squadId: "$userContestData.squadRef" },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    {
+                      $eq: ["$_id", "$$squadId"],
+                    },
+                  ],
+                },
+              },
+            },
+          ],
+          as: "squad",
+        },
+      },
+      {
+        $unwind: "$squad",
+      },
+      {
+        $project: {
+          playersIds: "$players",
+          team1: {
+            $arrayElemAt: ["$squad.squad", 0],
+          },
+          team2: {
+            $arrayElemAt: ["$squad.squad", 1],
+          },
+          userContestData: "$userContestData",
+          matchData: "$matchData",
+          captain: "$captain",
+          viceCaptain: "$viceCaptain",
+          userId: "$userId",
+          contestId: "$contestId",
+          points: "$points",
+          result: "$result",
+        },
+      },
+      {
+        $project: {
+          playersIds: "$playersIds",
+          players: {
+            $concatArrays: ["$team1.players", "$team2.players"],
+          },
+          userContestData: "$userContestData",
+          matchData: "$matchData",
+          captain: "$captain",
+          viceCaptain: "$viceCaptain",
+          userId: "$userId",
+          contestId: "$contestId",
+          points: "$points",
+          result: "$result",
+        },
+      },
+      {
+        $addFields: {
+          playing11: {
+            $filter: {
+              input: "$players",
+              as: "player",
+              cond: {
+                $in: ["$$player.id", "$playersIds"],
+              },
+            },
+          },
+        },
+      },
+      {
+        $project: {
+          contestDetails: {
+            entryFee: "$userContestData.entryFee",
+            prizePool: "$userContestData.prizePool",
+            maxParticipants: "$userContestData.maxParticipants",
+          },
+          user11: "$playing11",
+          matchDetails: {
+            name: "$matchData.name",
+            teamA: "$matchData.teamA",
+            teamB: "$matchData.teamB",
+            matchType: "$matchData.matchType",
+            date: "$matchData.date",
+            startTime: "$matchData.startTime",
+          },
+          userId: 1,
+          captain: 1,
+          viceCaptain: 1,
+          contestId: 1,
+          points: "$points",
+          result: "$result",
+        },
+      },
+    ]);
+    res
+      .status(201)
+      .json(
+        new ApiResponse(200, userContest, "User contest Updated successfully")
+      );
+  } catch {
+    console.log("Error while updating team: ", error);
+    throw new ApiError(400, "Error while updating team");
+  }
+});
 const getAllUserContests = asyncHandler(async (req, res) => {
   try {
     const userId = req.user.id;
@@ -262,6 +413,7 @@ const getUserContestsById = asyncHandler(async (req, res) => {
     throw new ApiError(500, "Error while fetching user contest with given id");
   }
 });
+
 const updateUserContestsById = asyncHandler(async (req, res) => {
   try {
     const { id, opponentId } = req.body;
@@ -515,7 +667,7 @@ const updateUserContestsById = asyncHandler(async (req, res) => {
       const isMatchEnded = matchInfo.data.data.matchEnded;
 
       //NOTE: if match ended then show the details do not call the api again to calculate points
-      if (isMatchEnded) {
+      if (isMatchEnded && userContest[0].result != null) {
         return res.status(200).json(
           new ApiResponse(
             200,
@@ -882,4 +1034,5 @@ export {
   getAllUserContests,
   getUserContestsById,
   updateUserContestsById,
+  updateTeam,
 };
