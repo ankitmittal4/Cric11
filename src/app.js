@@ -37,4 +37,8 @@ app.use("/api/v1/team", teamRouter);
 app.use("/api/v1/user-contest", userContestRouter);
 app.use("/api/v1/opponent", OpponentRouter);
 
+app.get("/", (req, res) => {
+  res.send("<h1>Backend server is running</h1>");
+});
+
 export { app };
