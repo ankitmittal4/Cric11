@@ -131,7 +131,15 @@ const createContest = asyncHandler(async (req, res) => {
   const matchInfoApiUrl = `${process.env.API_URL}${matchInfoApiEndpoint}?apikey=${process.env.API_KEY}&id=${matchId}`;
   const matchInfo = await axios.get(matchInfoApiUrl);
   //   console.log("matchInfo::: ", matchInfo.data.data);
-  const { name, matchType, venue, teams, dateTimeGMT } = matchInfo?.data?.data;
+  const {
+    name,
+    matchType,
+    venue,
+    teams,
+    dateTimeGMT,
+    matchEnded,
+    matchStarted,
+  } = matchInfo?.data?.data;
   const teamA = teams[0];
   const teamB = teams[1];
   const teamAImg = matchInfo?.data?.data?.teamInfo?.[0]?.img;
@@ -173,6 +181,8 @@ const createContest = asyncHandler(async (req, res) => {
     date,
     startTime,
     venue,
+    matchEnded,
+    matchStarted,
   });
   if (!match) {
     throw new ApiError(500, "Something went wrong while creating a match");

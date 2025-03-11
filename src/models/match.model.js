@@ -34,6 +34,14 @@ const matchSchema = new Schema(
       type: String,
       required: true,
     },
+    matchEnded: {
+      type: Boolean,
+      required: true,
+    },
+    matchStarted: {
+      type: Boolean,
+      required: true,
+    },
     venue: {
       type: String,
     },
