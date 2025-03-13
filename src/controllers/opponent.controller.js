@@ -3,22 +3,31 @@ import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { Opponent } from "../models/opponent.model.js";
 import mongoose, { Mongoose } from "mongoose";
+import { UserContest } from "../models/userContest.model.js";
 
 const createOpponent = asyncHandler(async (req, res) => {
   const { contestId, userContestId } = req.body;
-  // console.log("user_id: ", user_id);
 
   try {
     let opponent = await Opponent.findOne({ contestId });
+    let userContest = await UserContest.findOne({ _id: userContestId });
 
     if (opponent) {
       let added = false;
+      const userId = userContest.userId;
 
       for (let pair of opponent.opponents) {
         if (pair.length < 2) {
-          pair.push(userContestId);
-          added = true;
-          break;
+          const opponentContest = await UserContest.findOne({
+            _id: pair[0].toString(),
+          });
+          const opponentUserId = opponentContest.userId;
+
+          if (userId.toString() != opponentUserId.toString()) {
+            pair.push(userContestId);
+            added = true;
+            break;
+          }
         }
       }
 
