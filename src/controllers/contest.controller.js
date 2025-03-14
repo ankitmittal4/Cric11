@@ -129,8 +129,13 @@ const createContest = asyncHandler(async (req, res) => {
   //api call for matchInfo
   const matchInfoApiEndpoint = "match_info";
   const matchInfoApiUrl = `${process.env.API_URL}${matchInfoApiEndpoint}?apikey=${process.env.API_KEY}&id=${matchId}`;
-  const matchInfo = await axios.get(matchInfoApiUrl);
-  //   console.log("matchInfo::: ", matchInfo.data.data);
+  let matchInfo;
+  try {
+    matchInfo = await axios.get(matchInfoApiUrl);
+  } catch (error) {
+    console.log("Error while getting match info: ", error);
+  }
+  //   console.log("matchInfo::: ", matchInfo);
   const {
     name,
     matchType,
@@ -169,7 +174,6 @@ const createContest = asyncHandler(async (req, res) => {
   ) {
     throw new ApiError(400, "All fields are required");
   }
-
   const match = await Match.create({
     matchId,
     matchType,
