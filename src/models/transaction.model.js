@@ -17,7 +17,7 @@ const transactionSchema = new Schema(
     },
     transactionStatus: {
       type: String,
-      enum: ["Pending", "Completed", "Failed"],
+      enum: ["Pending", "Success", "Failed"],
       default: "Pending",
     },
   },
