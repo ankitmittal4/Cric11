@@ -3,7 +3,8 @@ import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { UserContest } from "../models/userContest.model.js";
 import { Contest } from "../models/contest.model.js";
-import mongoose from "mongoose";
+import { Transaction } from "../models/transaction.model.js";
+import mongoose, { Mongoose } from "mongoose";
 import axios from "axios";
 const createUserContest = async (req, res) => {
   const { _id } = req.user;
@@ -18,6 +19,14 @@ const createUserContest = async (req, res) => {
     captain,
     viceCaptain,
   });
+
+  const transaction = await Transaction.create({
+    userId: _id,
+    amount: contest.entryFee,
+    transactionType: "Deposit",
+    transactionStatus: "Success",
+  });
+  //   console.log("Transaction: ", transaction);
 
   try {
     const savedUserContest = await userContest.save();

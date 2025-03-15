@@ -7,6 +7,7 @@ import { Player } from "../models/player.model.js";
 import jwt from "jsonwebtoken";
 import axios from "axios";
 import mongoose from "mongoose";
+import { Transaction } from "../models/transaction.model.js";
 
 const getAllContests = asyncHandler(async (req, res) => {
   try {
@@ -223,6 +224,7 @@ const createContest = asyncHandler(async (req, res) => {
     matchRef,
     squadRef,
   });
+
   if (!contest) {
     throw new ApiError(500, "Something went wrong while creating a contest");
   }
