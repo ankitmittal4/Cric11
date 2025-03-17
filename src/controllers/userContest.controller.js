@@ -4,32 +4,54 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { UserContest } from "../models/userContest.model.js";
 import { Contest } from "../models/contest.model.js";
 import { Transaction } from "../models/transaction.model.js";
+import { User } from "../models/user.model.js";
 import mongoose, { Mongoose } from "mongoose";
 import axios from "axios";
-const createUserContest = async (req, res) => {
-  const { _id } = req.user;
-  const contest = await Contest.findById(req.body.contestId);
-  const { contestId, players, captain, viceCaptain } = req.body;
-
-  const userContest = new UserContest({
-    userId: _id,
-    matchId: contest.matchRef,
-    contestId,
-    players,
-    captain,
-    viceCaptain,
-  });
-
-  const transaction = await Transaction.create({
-    userId: _id,
-    amount: contest.entryFee,
-    transactionType: "Deposit",
-    transactionStatus: "Success",
-  });
-  //   console.log("Transaction: ", transaction);
-
+const createUserContest = async (req, res, next) => {
   try {
+    const { _id } = req.user;
+    const contest = await Contest.findById(req.body.contestId);
+    const { contestId, players, captain, viceCaptain } = req.body;
+
+    const userContest = new UserContest({
+      userId: _id,
+      matchId: contest.matchRef,
+      contestId,
+      players,
+      captain,
+      viceCaptain,
+    });
+
+    const user = await User.findById(_id);
+    const { walletBalance } = user;
+
+    // Check if wallet balance is sufficient
+    if (walletBalance < contest.entryFee) {
+      return res.status(404).json({
+        message: "You don't have enough balance to play this contest",
+      });
+    }
+
+    // Deduct entry fee from wallet balance
+    const remBalance = walletBalance - contest.entryFee;
+    await User.findByIdAndUpdate(
+      _id,
+      { walletBalance: remBalance },
+      { new: true }
+    );
+
+    // Create a transaction record
+    const transaction = await Transaction.create({
+      userId: _id,
+      amount: contest.entryFee,
+      transactionType: "Deposit",
+      transactionStatus: "Success",
+    });
+
+    // Save the user contest
     const savedUserContest = await userContest.save();
+
+    // Send success response
     res
       .status(201)
       .json(
