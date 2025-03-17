@@ -2,6 +2,7 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { Transaction } from "../models/transaction.model.js";
+import { User } from "../models/user.model.js";
 import mongoose, { Mongoose } from "mongoose";
 
 const getAllTransactions = asyncHandler(async (req, res) => {
@@ -12,7 +13,9 @@ const getAllTransactions = asyncHandler(async (req, res) => {
         $match: { userId: new mongoose.Types.ObjectId(userId) },
       },
     ]);
-    console.log("Transactions", transactions);
+    const user = await User.findById(userId);
+    const { walletBalance } = user;
+    // console.log("Balance", walletBalance);
     if (transactions.length === 0) {
       return res
         .status(404)
@@ -23,7 +26,7 @@ const getAllTransactions = asyncHandler(async (req, res) => {
       .json(
         new ApiResponse(
           200,
-          transactions,
+          { transactions, walletBalance },
           "All Transaction fetched successfully"
         )
       );
