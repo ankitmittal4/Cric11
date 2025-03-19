@@ -166,4 +166,33 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
   }
 });
 
-export { registerUser, loginUser, logoutUser, refreshAccessToken };
+const getUserWalletBalance = asyncHandler(async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const user = await User.findById(userId).select("walletBalance");
+    if (!user) {
+      throw new ApiError(404, "User not found");
+    }
+    // console.log(user);
+    const { walletBalance } = user;
+    res
+      .status(200)
+      .json(
+        new ApiResponse(
+          200,
+          { walletBalance },
+          "User wallet balance fetched successfully"
+        )
+      );
+  } catch (error) {
+    throw new ApiError(500, "Error in getting get user wallet balance");
+  }
+});
+
+export {
+  registerUser,
+  loginUser,
+  logoutUser,
+  refreshAccessToken,
+  getUserWalletBalance,
+};
