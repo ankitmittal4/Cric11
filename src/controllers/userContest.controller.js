@@ -689,7 +689,7 @@ const updateUserContestsById = asyncHandler(async (req, res) => {
 
     //NOTE: fetch points from fantasy match points API
     const matchId = userContest[0].matchDetails.matchId;
-    const fantasyMatchatchPointsEndPoint = "match_points";
+    const fantasyMatchatchPointsEndPoint = "match_bbb";
     const fantasyMatchPointsApiUrl = `${process.env.API_URL}${fantasyMatchatchPointsEndPoint}?apikey=${process.env.API_KEY}&id=${matchId}`;
 
     const matchInfoApiEndpoint = "match_info";
@@ -718,16 +718,31 @@ const updateUserContestsById = asyncHandler(async (req, res) => {
         // console.log(fantasyPoints.data.data.totals);
 
         //NOTE: matching both user11 and fantasy data to calculate match points
-        const fantasyData = fantasyPoints.data.data.totals;
-        const user11 = userContest[0].user11;
-        const opponent11 = opponentContest[0].user11;
-        const fantasyDataLookup = fantasyData.reduce((acc, player) => {
-          acc[player.id] = player.points;
+        const bbb = fantasyPoints?.data?.bbb; //it is an array
+        const fantasyDataLookup = bbb.reduce((acc, ball) => {
+          acc[ball?.batsman?.id] = acc[ball?.batsman?.id] || 0;
+          acc[ball?.bowler?.id] = acc[ball?.bowler?.id] || 0;
+
+          if (ball?.dismissal) {
+            acc[ball?.bowler.id] += 10;
+          } else if (ball?.penalty) {
+            acc[ball?.bowler.id] -= ball?.extras || 0;
+          } else {
+            acc[ball?.batsman.id] += ball?.runs || 0;
+            if (ball?.runs === 4 || ball?.runs === 6) {
+              acc[ball?.batsman.id] += ball?.runs === 4 ? 1 : 2;
+              acc[ball?.bowler.id] -= ball?.runs === 4 ? 1 : 2;
+            }
+          }
           return acc;
         }, {});
-        //Calculate the sum of points for matching players
+
+        const user11 = userContest[0].user11;
+        const opponent11 = opponentContest[0].user11;
         let totalPointsOfUser = 0;
         let totalPointsOfOpponent = 0;
+        // let totalPointsOfUser = userContest[0].points;
+        // let totalPointsOfOpponent = opponentContest[0].points;
         user11.forEach((player) => {
           const playerId = player.id.toString();
           if (fantasyDataLookup[playerId]) {
@@ -752,6 +767,44 @@ const updateUserContestsById = asyncHandler(async (req, res) => {
             }
           }
         });
+
+        //fantasy match points
+        // const fantasyData = fantasyPoints.data.data.totals;
+        // const user11 = userContest[0].user11;
+        // const opponent11 = opponentContest[0].user11;
+        // let totalPointsOfUser = 0;
+        // let totalPointsOfOpponent = 0;
+        // const fantasyDataLookup = fantasyData.reduce((acc, player) => {
+        //   acc[player.id] = player.points;
+        //   return acc;
+        // }, {});
+        // user11.forEach((player) => {
+        //   const playerId = player.id.toString();
+        //   if (fantasyDataLookup[playerId]) {
+        //     if (playerId === userContest[0].captain) {
+        //       totalPointsOfUser += 2 * fantasyDataLookup[playerId];
+        //     } else if (playerId === userContest[0].viceCaptain) {
+        //       totalPointsOfUser += 1.5 * fantasyDataLookup[playerId];
+        //     } else {
+        //       totalPointsOfUser += fantasyDataLookup[playerId];
+        //     }
+        //   }
+        // });
+        // opponent11.forEach((player) => {
+        //   const playerId = player.id.toString();
+        //   if (fantasyDataLookup[playerId]) {
+        //     if (playerId === opponentContest[0].captain) {
+        //       totalPointsOfOpponent += 2 * fantasyDataLookup[playerId];
+        //     } else if (playerId === opponentContest[0].viceCaptain) {
+        //       totalPointsOfOpponent += 1.5 * fantasyDataLookup[playerId];
+        //     } else {
+        //       totalPointsOfOpponent += fantasyDataLookup[playerId];
+        //     }
+        //   }
+        // });
+
+        //Calculate the sum of points for matching players
+
         //update points and result in database
         let userResult;
         let opponentResult;
