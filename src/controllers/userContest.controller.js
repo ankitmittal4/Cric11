@@ -76,20 +76,24 @@ const updateTeam = asyncHandler(async (req, res) => {
   //   const contest = await Contest.findById(req.body.contestId);
   const { id, players, captain, viceCaptain } = req.body;
   console.log("Response: ", req.body);
+  const updatedPlayers = players.map((playerId) => ({
+    id: playerId,
+    //   points: 0,
+  }));
 
   try {
     const updateTeam = await UserContest.findByIdAndUpdate(
       id,
       {
         $set: {
-          players: players,
+          players: updatedPlayers,
           captain: captain,
           viceCaptain: viceCaptain,
         },
       },
       { new: true }
     );
-    console.log("Update Team", updateTeam);
+    // console.log("Update Team", updateTeam);
     const userContest = await UserContest.aggregate([
       {
         $match: { _id: new mongoose.Types.ObjectId(id) },
@@ -181,7 +185,16 @@ const updateTeam = asyncHandler(async (req, res) => {
               input: "$players",
               as: "player",
               cond: {
-                $in: ["$$player.id", "$playersIds"],
+                $in: [
+                  "$$player.id",
+                  {
+                    $map: {
+                      input: "$playersIds",
+                      as: "pid",
+                      in: "$$pid.id",
+                    },
+                  },
+                ],
               },
             },
           },
@@ -212,6 +225,7 @@ const updateTeam = asyncHandler(async (req, res) => {
         },
       },
     ]);
+    // console.log("User contest: ", userContest);
     res
       .status(201)
       .json(
