@@ -75,6 +75,7 @@ const updateTeam = asyncHandler(async (req, res) => {
   const { _id } = req.user;
   //   const contest = await Contest.findById(req.body.contestId);
   const { id, players, captain, viceCaptain } = req.body;
+  console.log("Response: ", req.body);
 
   try {
     const updateTeam = await UserContest.findByIdAndUpdate(
@@ -398,7 +399,16 @@ const getUserContestsById = asyncHandler(async (req, res) => {
               input: "$players",
               as: "player",
               cond: {
-                $in: ["$$player.id", "$playersIds"],
+                $in: [
+                  "$$player.id",
+                  {
+                    $map: {
+                      input: "$playersIds",
+                      as: "pid",
+                      in: "$$pid.id",
+                    },
+                  },
+                ],
               },
             },
           },
