@@ -20,9 +20,16 @@ const userContestSchema = new Schema(
     },
     players: [
       {
-        type: String,
-        ref: "Player",
-        required: true,
+        id: {
+          type: String,
+          ref: "Player",
+          required: true,
+        },
+        points: {
+          type: Number,
+          default: 0,
+        },
+        _id: false,
       },
     ],
     captain: {
@@ -42,6 +49,10 @@ const userContestSchema = new Schema(
     result: {
       type: String,
       default: null,
+    },
+    n: {
+      type: Number,
+      default: 0,
     },
   },
   { timestamps: true }

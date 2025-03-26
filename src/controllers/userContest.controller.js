@@ -12,12 +12,16 @@ const createUserContest = async (req, res, next) => {
     const { _id } = req.user;
     const contest = await Contest.findById(req.body.contestId);
     const { contestId, players, captain, viceCaptain } = req.body;
-
+    console.log(players);
+    const updatedPlayers = players.map((playerId) => ({
+      id: playerId,
+      //   points: 0,
+    }));
     const userContest = new UserContest({
       userId: _id,
       matchId: contest.matchRef,
       contestId,
-      players,
+      players: updatedPlayers,
       captain,
       viceCaptain,
     });
@@ -516,6 +520,7 @@ const updateUserContestsById = asyncHandler(async (req, res) => {
           viceCaptain: "$viceCaptain",
           points: "$points",
           result: "$result",
+          n: "$n",
         },
       },
       {
@@ -530,6 +535,7 @@ const updateUserContestsById = asyncHandler(async (req, res) => {
           viceCaptain: "$viceCaptain", // Include captain here as well
           points: "$points",
           result: "$result",
+          n: "$n",
         },
       },
       {
@@ -566,6 +572,7 @@ const updateUserContestsById = asyncHandler(async (req, res) => {
           viceCaptain: 1,
           points: "$points",
           result: "$result",
+          n: "$n",
         },
       },
     ]);
@@ -633,6 +640,7 @@ const updateUserContestsById = asyncHandler(async (req, res) => {
           viceCaptain: "$viceCaptain",
           points: "$points",
           result: "$result",
+          n: "$n",
         },
       },
       {
@@ -647,6 +655,7 @@ const updateUserContestsById = asyncHandler(async (req, res) => {
           viceCaptain: "$viceCaptain",
           points: "$points",
           result: "$result",
+          n: "$n",
         },
       },
       {
@@ -683,6 +692,7 @@ const updateUserContestsById = asyncHandler(async (req, res) => {
           viceCaptain: 1,
           points: "$points",
           result: "$result",
+          n: "$n",
         },
       },
     ]);
@@ -715,11 +725,26 @@ const updateUserContestsById = asyncHandler(async (req, res) => {
 
       const fantasyPoints = await axios.get(fantasyMatchPointsApiUrl);
       if (fantasyPoints.data.status === "success") {
-        // console.log(fantasyPoints.data.data.totals);
+        // const isMatchEnded = fantasyPoints?.data?.matchEnded;
+        // if (isMatchEnded && userContest[0].result != null) {
+        //   return res.status(200).json(
+        //     new ApiResponse(
+        //       200,
+        //       {
+        //         updatedUserContest: userContest,
+        //         updatedOpponentContest: opponentContest,
+        //       },
+        //       "user contest with given id fetched successfully"
+        //     )
+        //   );
+        // }
 
         //NOTE: matching both user11 and fantasy data to calculate match points
+        const n = userContest[0]?.n || opponentContest[0]?.n;
         const bbb = fantasyPoints?.data?.bbb; //it is an array
-        const fantasyDataLookup = bbb.reduce((acc, ball) => {
+        const filterbbb = bbb.filter((ball) => ball.n > n);
+        // const filterbbb = bbb.slice(n);
+        const fantasyDataLookup = filterbbb.reduce((acc, ball) => {
           acc[ball?.batsman?.id] = acc[ball?.batsman?.id] || 0;
           acc[ball?.bowler?.id] = acc[ball?.bowler?.id] || 0;
 
@@ -736,6 +761,8 @@ const updateUserContestsById = asyncHandler(async (req, res) => {
           }
           return acc;
         }, {});
+
+        const updatedn = filterbbb[filterbbb.size() - 1].n;
 
         const user11 = userContest[0].user11;
         const opponent11 = opponentContest[0].user11;
@@ -827,6 +854,7 @@ const updateUserContestsById = asyncHandler(async (req, res) => {
                 $set: {
                   points: totalPointsOfUser,
                   result: isMatchEnded ? userResult : null,
+                  n: updatedn,
                 },
               },
             },
@@ -838,6 +866,7 @@ const updateUserContestsById = asyncHandler(async (req, res) => {
                 $set: {
                   points: totalPointsOfOpponent,
                   result: isMatchEnded ? opponentResult : null,
+                  n: updatedn,
                 },
               },
             },
