@@ -181,17 +181,48 @@ const updateTeam = asyncHandler(async (req, res) => {
       {
         $addFields: {
           playing11: {
-            $filter: {
-              input: "$players",
+            $map: {
+              input: {
+                $filter: {
+                  input: "$players",
+                  as: "player",
+                  cond: {
+                    $in: [
+                      "$$player.id",
+                      {
+                        $map: {
+                          input: "$playersIds",
+                          as: "pid",
+                          in: "$$pid.id",
+                        },
+                      },
+                    ],
+                  },
+                },
+              },
               as: "player",
-              cond: {
-                $in: [
-                  "$$player.id",
+              in: {
+                $mergeObjects: [
+                  "$$player",
                   {
-                    $map: {
-                      input: "$playersIds",
-                      as: "pid",
-                      in: "$$pid.id",
+                    $let: {
+                      vars: {
+                        playerPoints: {
+                          $arrayElemAt: [
+                            {
+                              $filter: {
+                                input: "$playersIds",
+                                as: "pid",
+                                cond: { $eq: ["$$pid.id", "$$player.id"] },
+                              },
+                            },
+                            0,
+                          ],
+                        },
+                      },
+                      in: {
+                        points: "$$playerPoints.points",
+                      },
                     },
                   },
                 ],
@@ -409,17 +440,48 @@ const getUserContestsById = asyncHandler(async (req, res) => {
       {
         $addFields: {
           playing11: {
-            $filter: {
-              input: "$players",
+            $map: {
+              input: {
+                $filter: {
+                  input: "$players",
+                  as: "player",
+                  cond: {
+                    $in: [
+                      "$$player.id",
+                      {
+                        $map: {
+                          input: "$playersIds",
+                          as: "pid",
+                          in: "$$pid.id",
+                        },
+                      },
+                    ],
+                  },
+                },
+              },
               as: "player",
-              cond: {
-                $in: [
-                  "$$player.id",
+              in: {
+                $mergeObjects: [
+                  "$$player",
                   {
-                    $map: {
-                      input: "$playersIds",
-                      as: "pid",
-                      in: "$$pid.id",
+                    $let: {
+                      vars: {
+                        playerPoints: {
+                          $arrayElemAt: [
+                            {
+                              $filter: {
+                                input: "$playersIds",
+                                as: "pid",
+                                cond: { $eq: ["$$pid.id", "$$player.id"] },
+                              },
+                            },
+                            0,
+                          ],
+                        },
+                      },
+                      in: {
+                        points: "$$playerPoints.points",
+                      },
                     },
                   },
                 ],
