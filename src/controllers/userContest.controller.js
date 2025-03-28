@@ -627,11 +627,51 @@ const updateUserContestsById = asyncHandler(async (req, res) => {
       {
         $addFields: {
           playing11: {
-            $filter: {
-              input: "$players",
+            $map: {
+              input: {
+                $filter: {
+                  input: "$players",
+                  as: "player",
+                  cond: {
+                    $in: [
+                      "$$player.id",
+                      {
+                        $map: {
+                          input: "$playersIds",
+                          as: "pid",
+                          in: "$$pid.id",
+                        },
+                      },
+                    ],
+                  },
+                },
+              },
               as: "player",
-              cond: {
-                $in: ["$$player.id", "$playersIds"],
+              in: {
+                $mergeObjects: [
+                  "$$player",
+                  {
+                    $let: {
+                      vars: {
+                        playerPoints: {
+                          $arrayElemAt: [
+                            {
+                              $filter: {
+                                input: "$playersIds",
+                                as: "pid",
+                                cond: { $eq: ["$$pid.id", "$$player.id"] },
+                              },
+                            },
+                            0,
+                          ],
+                        },
+                      },
+                      in: {
+                        points: "$$playerPoints.points",
+                      },
+                    },
+                  },
+                ],
               },
             },
           },
@@ -747,11 +787,51 @@ const updateUserContestsById = asyncHandler(async (req, res) => {
       {
         $addFields: {
           playing11: {
-            $filter: {
-              input: "$players",
+            $map: {
+              input: {
+                $filter: {
+                  input: "$players",
+                  as: "player",
+                  cond: {
+                    $in: [
+                      "$$player.id",
+                      {
+                        $map: {
+                          input: "$playersIds",
+                          as: "pid",
+                          in: "$$pid.id",
+                        },
+                      },
+                    ],
+                  },
+                },
+              },
               as: "player",
-              cond: {
-                $in: ["$$player.id", "$playersIds"],
+              in: {
+                $mergeObjects: [
+                  "$$player",
+                  {
+                    $let: {
+                      vars: {
+                        playerPoints: {
+                          $arrayElemAt: [
+                            {
+                              $filter: {
+                                input: "$playersIds",
+                                as: "pid",
+                                cond: { $eq: ["$$pid.id", "$$player.id"] },
+                              },
+                            },
+                            0,
+                          ],
+                        },
+                      },
+                      in: {
+                        points: "$$playerPoints.points",
+                      },
+                    },
+                  },
+                ],
               },
             },
           },
@@ -808,8 +888,11 @@ const updateUserContestsById = asyncHandler(async (req, res) => {
           )
         );
       }
+      //   console.log("Step 1");
 
       const fantasyPoints = await axios.get(fantasyMatchPointsApiUrl);
+      //   console.log(fantasyMatchPointsApiUrl);
+      //   console.log("++++++++", fantasyPoints.data.data.bbb);
       if (fantasyPoints.data.status === "success") {
         // const isMatchEnded = fantasyPoints?.data?.matchEnded;
         // if (isMatchEnded && userContest[0].result != null) {
@@ -827,9 +910,11 @@ const updateUserContestsById = asyncHandler(async (req, res) => {
 
         //NOTE: matching both user11 and fantasy data to calculate match points
         const n = userContest[0]?.n || opponentContest[0]?.n;
-        const bbb = fantasyPoints?.data?.bbb; //it is an array
+        const bbb = fantasyPoints?.data?.data?.bbb; //it is an array
         const filterbbb = bbb.filter((ball) => ball.n > n);
+
         // const filterbbb = bbb.slice(n);
+        // console.log("Step 9");
         const fantasyDataLookup = filterbbb.reduce((acc, ball) => {
           acc[ball?.batsman?.id] = acc[ball?.batsman?.id] || 0;
           acc[ball?.bowler?.id] = acc[ball?.bowler?.id] || 0;
@@ -847,76 +932,47 @@ const updateUserContestsById = asyncHandler(async (req, res) => {
           }
           return acc;
         }, {});
-
-        const updatedn = filterbbb[filterbbb.size() - 1].n;
-
+        // console.log("Step 0: ", bbb);
+        // console.log("Step 10");
+        const updatedn = bbb[bbb.length - 1].n;
         const user11 = userContest[0].user11;
         const opponent11 = opponentContest[0].user11;
+
         let totalPointsOfUser = 0;
         let totalPointsOfOpponent = 0;
         // let totalPointsOfUser = userContest[0].points;
         // let totalPointsOfOpponent = opponentContest[0].points;
-        user11.forEach((player) => {
+        const updatedUserPlayers = user11.map((player) => {
           const playerId = player.id.toString();
-          if (fantasyDataLookup[playerId]) {
-            if (playerId === userContest[0].captain) {
-              totalPointsOfUser += 2 * fantasyDataLookup[playerId];
-            } else if (playerId === userContest[0].viceCaptain) {
-              totalPointsOfUser += 1.5 * fantasyDataLookup[playerId];
-            } else {
-              totalPointsOfUser += fantasyDataLookup[playerId];
-            }
+          let points = fantasyDataLookup[playerId] || 0;
+
+          if (playerId === userContest[0].captain) {
+            points *= 2;
+          } else if (playerId === userContest[0].viceCaptain) {
+            points *= 1.5;
           }
+          totalPointsOfUser += points;
+          return {
+            id: player.id,
+            points: points,
+          };
         });
-        opponent11.forEach((player) => {
+        const updatedOpponentPlayers = opponent11.map((player) => {
           const playerId = player.id.toString();
-          if (fantasyDataLookup[playerId]) {
-            if (playerId === opponentContest[0].captain) {
-              totalPointsOfOpponent += 2 * fantasyDataLookup[playerId];
-            } else if (playerId === opponentContest[0].viceCaptain) {
-              totalPointsOfOpponent += 1.5 * fantasyDataLookup[playerId];
-            } else {
-              totalPointsOfOpponent += fantasyDataLookup[playerId];
-            }
+          let points = fantasyDataLookup[playerId] || 0;
+
+          if (playerId === userContest[0].captain) {
+            points *= 2;
+          } else if (playerId === userContest[0].viceCaptain) {
+            points *= 1.5;
           }
+          totalPointsOfOpponent += points;
+          return {
+            // ...(player.toObject ? player.toObject() : player),
+            id: player.id,
+            points: points,
+          };
         });
-
-        //fantasy match points
-        // const fantasyData = fantasyPoints.data.data.totals;
-        // const user11 = userContest[0].user11;
-        // const opponent11 = opponentContest[0].user11;
-        // let totalPointsOfUser = 0;
-        // let totalPointsOfOpponent = 0;
-        // const fantasyDataLookup = fantasyData.reduce((acc, player) => {
-        //   acc[player.id] = player.points;
-        //   return acc;
-        // }, {});
-        // user11.forEach((player) => {
-        //   const playerId = player.id.toString();
-        //   if (fantasyDataLookup[playerId]) {
-        //     if (playerId === userContest[0].captain) {
-        //       totalPointsOfUser += 2 * fantasyDataLookup[playerId];
-        //     } else if (playerId === userContest[0].viceCaptain) {
-        //       totalPointsOfUser += 1.5 * fantasyDataLookup[playerId];
-        //     } else {
-        //       totalPointsOfUser += fantasyDataLookup[playerId];
-        //     }
-        //   }
-        // });
-        // opponent11.forEach((player) => {
-        //   const playerId = player.id.toString();
-        //   if (fantasyDataLookup[playerId]) {
-        //     if (playerId === opponentContest[0].captain) {
-        //       totalPointsOfOpponent += 2 * fantasyDataLookup[playerId];
-        //     } else if (playerId === opponentContest[0].viceCaptain) {
-        //       totalPointsOfOpponent += 1.5 * fantasyDataLookup[playerId];
-        //     } else {
-        //       totalPointsOfOpponent += fantasyDataLookup[playerId];
-        //     }
-        //   }
-        // });
-
-        //Calculate the sum of points for matching players
 
         //update points and result in database
         let userResult;
@@ -938,6 +994,7 @@ const updateUserContestsById = asyncHandler(async (req, res) => {
 
               update: {
                 $set: {
+                  players: updatedUserPlayers,
                   points: totalPointsOfUser,
                   result: isMatchEnded ? userResult : null,
                   n: updatedn,
@@ -950,6 +1007,7 @@ const updateUserContestsById = asyncHandler(async (req, res) => {
               filter: { _id: opponentId },
               update: {
                 $set: {
+                  players: updatedOpponentPlayers,
                   points: totalPointsOfOpponent,
                   result: isMatchEnded ? opponentResult : null,
                   n: updatedn,
@@ -1042,11 +1100,51 @@ const updateUserContestsById = asyncHandler(async (req, res) => {
           {
             $addFields: {
               playing11: {
-                $filter: {
-                  input: "$players",
+                $map: {
+                  input: {
+                    $filter: {
+                      input: "$players",
+                      as: "player",
+                      cond: {
+                        $in: [
+                          "$$player.id",
+                          {
+                            $map: {
+                              input: "$playersIds",
+                              as: "pid",
+                              in: "$$pid.id",
+                            },
+                          },
+                        ],
+                      },
+                    },
+                  },
                   as: "player",
-                  cond: {
-                    $in: ["$$player.id", "$playersIds"],
+                  in: {
+                    $mergeObjects: [
+                      "$$player",
+                      {
+                        $let: {
+                          vars: {
+                            playerPoints: {
+                              $arrayElemAt: [
+                                {
+                                  $filter: {
+                                    input: "$playersIds",
+                                    as: "pid",
+                                    cond: { $eq: ["$$pid.id", "$$player.id"] },
+                                  },
+                                },
+                                0,
+                              ],
+                            },
+                          },
+                          in: {
+                            points: "$$playerPoints.points",
+                          },
+                        },
+                      },
+                    ],
                   },
                 },
               },
@@ -1159,11 +1257,51 @@ const updateUserContestsById = asyncHandler(async (req, res) => {
           {
             $addFields: {
               playing11: {
-                $filter: {
-                  input: "$players",
+                $map: {
+                  input: {
+                    $filter: {
+                      input: "$players",
+                      as: "player",
+                      cond: {
+                        $in: [
+                          "$$player.id",
+                          {
+                            $map: {
+                              input: "$playersIds",
+                              as: "pid",
+                              in: "$$pid.id",
+                            },
+                          },
+                        ],
+                      },
+                    },
+                  },
                   as: "player",
-                  cond: {
-                    $in: ["$$player.id", "$playersIds"],
+                  in: {
+                    $mergeObjects: [
+                      "$$player",
+                      {
+                        $let: {
+                          vars: {
+                            playerPoints: {
+                              $arrayElemAt: [
+                                {
+                                  $filter: {
+                                    input: "$playersIds",
+                                    as: "pid",
+                                    cond: { $eq: ["$$pid.id", "$$player.id"] },
+                                  },
+                                },
+                                0,
+                              ],
+                            },
+                          },
+                          in: {
+                            points: "$$playerPoints.points",
+                          },
+                        },
+                      },
+                    ],
                   },
                 },
               },
