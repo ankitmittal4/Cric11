@@ -7,6 +7,7 @@ import { Transaction } from "../models/transaction.model.js";
 import { User } from "../models/user.model.js";
 import mongoose, { Mongoose } from "mongoose";
 import axios from "axios";
+import { Match } from "../models/match.model.js";
 const createUserContest = async (req, res, next) => {
   try {
     const { _id } = req.user;
@@ -75,7 +76,7 @@ const updateTeam = asyncHandler(async (req, res) => {
   const { _id } = req.user;
   //   const contest = await Contest.findById(req.body.contestId);
   const { id, players, captain, viceCaptain } = req.body;
-  console.log("Response: ", req.body);
+  //   console.log("Response: ", req.body);
   const updatedPlayers = players.map((playerId) => ({
     id: playerId,
     //   points: 0,
@@ -270,6 +271,44 @@ const updateTeam = asyncHandler(async (req, res) => {
 const getAllUserContests = asyncHandler(async (req, res) => {
   try {
     const userId = req.user.id;
+
+    //NOTE:Update status of match
+    //---------------START--------------------------
+    const upcomingMatchesEndPoint = "cricScore";
+    const upcomingMatchesApiUrl = `${process.env.API_URL}${upcomingMatchesEndPoint}?apikey=${process.env.API_KEY}`;
+    const response = await axios.get(upcomingMatchesApiUrl);
+    if (!(response.data.status === "success") || !response.data.data.length) {
+      console.log("Error in getting upcoming matches in Backend");
+    }
+    const allmatches = response.data.data;
+    const match = await Match.find();
+    const matchIds = match.map((match) => {
+      return {
+        matchId: match.matchId,
+      };
+    });
+    // const matchIds = match.map((match) => ({
+    //   matchId: match.matchId,
+    // }));
+    // const matchIds = match.map((match) => match.matchId);
+    // console.log("Match: ", matchIds);
+    for (const match of allmatches) {
+      const isMatchExist = matchIds.some((item) => (item.matchId = match.id));
+      if (isMatchExist) {
+        await Match.findOneAndUpdate(
+          { matchId: match.id },
+          {
+            $set: {
+              matchStarted:
+                match.ms === "result" || match.ms === "live" ? true : false,
+              matchEnded: match.ms === "result" ? true : false,
+            },
+          },
+          { new: true }
+        );
+      }
+    }
+    //------------------END------------------
     const userContests = await UserContest.aggregate([
       {
         $match: { userId: new mongoose.Types.ObjectId(userId) },
