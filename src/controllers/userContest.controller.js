@@ -274,40 +274,41 @@ const getAllUserContests = asyncHandler(async (req, res) => {
 
     //NOTE:Update status of match
     //---------------START--------------------------
-    const upcomingMatchesEndPoint = "cricScore";
-    const upcomingMatchesApiUrl = `${process.env.API_URL}${upcomingMatchesEndPoint}?apikey=${process.env.API_KEY}`;
-    const response = await axios.get(upcomingMatchesApiUrl);
-    if (!(response.data.status === "success") || !response.data.data.length) {
-      console.log("Error in getting upcoming matches in Backend");
-    }
-    const allmatches = response.data.data;
-    const match = await Match.find();
-    const matchIds = match.map((match) => {
-      return {
-        matchId: match.matchId,
-      };
-    });
+    // const upcomingMatchesEndPoint = "cricScore";
+    // const upcomingMatchesApiUrl = `${process.env.API_URL}${upcomingMatchesEndPoint}?apikey=${process.env.API_KEY}`;
+    // const response = await axios.get(upcomingMatchesApiUrl);
+    // if (!(response.data.status === "success") || !response.data.data.length) {
+    //   console.log("Error in getting upcoming matches in Backend");
+    // }
+    // const allmatches = response.data.data;
+    // const match = await Match.find();
+    // const matchIds = match.map((match) => {
+    //   return {
+    //     matchId: match.matchId,
+    //   };
+    // });
     // const matchIds = match.map((match) => ({
     //   matchId: match.matchId,
     // }));
     // const matchIds = match.map((match) => match.matchId);
     // console.log("Match: ", matchIds);
-    for (const match of allmatches) {
-      const isMatchExist = matchIds.some((item) => (item.matchId = match.id));
-      if (isMatchExist) {
-        await Match.findOneAndUpdate(
-          { matchId: match.id },
-          {
-            $set: {
-              matchStarted:
-                match.ms === "result" || match.ms === "live" ? true : false,
-              matchEnded: match.ms === "result" ? true : false,
-            },
-          },
-          { new: true }
-        );
-      }
-    }
+
+    // for (const match of allmatches) {
+    //   const isMatchExist = matchIds.some((item) => (item.matchId = match.id));
+    //   if (isMatchExist) {
+    //     await Match.findOneAndUpdate(
+    //       { matchId: match.id },
+    //       {
+    //         $set: {
+    //           matchStarted:
+    //             match.ms === "result" || match.ms === "live" ? true : false,
+    //           matchEnded: match.ms === "result" ? true : false,
+    //         },
+    //       },
+    //       { new: true }
+    //     );
+    //   }
+    // }
     //------------------END------------------
     const userContests = await UserContest.aggregate([
       {
@@ -732,6 +733,8 @@ const updateUserContestsById = asyncHandler(async (req, res) => {
             matchId: "$matchData.matchId",
             date: "$matchData.date",
             startTime: "$matchData.startTime",
+            matchStarted: "$matchData.matchStarted",
+            matchEnded: "$matchData.matchStarted",
           },
           captain: 1, // Keep this line to ensure captain is in the final response
           viceCaptain: 1,
@@ -913,6 +916,22 @@ const updateUserContestsById = asyncHandler(async (req, res) => {
     try {
       const matchInfo = await axios.get(matchInfoApiUrl);
       const isMatchEnded = matchInfo.data.data.matchEnded;
+
+      //NOTE: Update Match status code
+      //-----------------------------------START---------------------------------------->
+      const matchId = userContest[0].matchDetails.matchId;
+      const data = await Match.findOneAndUpdate(
+        { matchId: matchId },
+        {
+          $set: {
+            matchStarted: true,
+            matchEnded: isMatchEnded,
+          },
+        },
+        { new: true }
+      );
+      //   console.log("Data: ", data);
+      //-----------------------------------ENDS---------------------------------------->
 
       //NOTE: if match ended then show the details do not call the api again to calculate points
       if (isMatchEnded && userContest[0].result != null) {
