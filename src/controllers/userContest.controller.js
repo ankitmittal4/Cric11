@@ -877,6 +877,7 @@ const updateUserContestsById = asyncHandler(async (req, res) => {
 
       //NOTE: if match ended then show the details do not call the api again to calculate points
       if (isMatchEnded && userContest[0].result != null) {
+        // console.log("Step 1");
         return res.status(200).json(
           new ApiResponse(
             200,
@@ -888,7 +889,6 @@ const updateUserContestsById = asyncHandler(async (req, res) => {
           )
         );
       }
-      //   console.log("Step 1");
 
       const fantasyPoints = await axios.get(fantasyMatchPointsApiUrl);
       //   console.log(fantasyMatchPointsApiUrl);
