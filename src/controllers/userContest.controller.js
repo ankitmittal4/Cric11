@@ -910,61 +910,72 @@ const updateUserContestsById = asyncHandler(async (req, res) => {
     const fantasyMatchatchPointsEndPoint = "match_bbb";
     const fantasyMatchPointsApiUrl = `${process.env.API_URL}${fantasyMatchatchPointsEndPoint}?apikey=${process.env.API_KEY}&id=${matchId}`;
 
-    const matchInfoApiEndpoint = "match_info";
-    const matchInfoApiUrl = `${process.env.API_URL}${matchInfoApiEndpoint}?apikey=${process.env.API_KEY}&id=${matchId}`;
+    // const matchInfoApiEndpoint = "match_info";
+    // const matchInfoApiUrl = `${process.env.API_URL}${matchInfoApiEndpoint}?apikey=${process.env.API_KEY}&id=${matchId}`;
 
     try {
-      const matchInfo = await axios.get(matchInfoApiUrl);
-      const isMatchEnded = matchInfo.data.data.matchEnded;
+      //   const matchInfo = await axios.get(matchInfoApiUrl);
+      //   const isMatchEnded = matchInfo.data.data.matchEnded;
 
       //NOTE: Update Match status code
       //-----------------------------------START---------------------------------------->
-      const matchId = userContest[0].matchDetails.matchId;
-      const data = await Match.findOneAndUpdate(
-        { matchId: matchId },
-        {
-          $set: {
-            matchStarted: true,
-            matchEnded: isMatchEnded,
-          },
-        },
-        { new: true }
-      );
+      //   const matchId = userContest[0].matchDetails.matchId;
+      //   const data = await Match.findOneAndUpdate(
+      //     { matchId: matchId },
+      //     {
+      //       $set: {
+      //         matchStarted: true,
+      //         matchEnded: isMatchEnded,
+      //       },
+      //     },
+      //     { new: true }
+      //   );
       //   console.log("Data: ", data);
       //-----------------------------------ENDS---------------------------------------->
 
       //NOTE: if match ended then show the details do not call the api again to calculate points
-      if (isMatchEnded && userContest[0].result != null) {
-        // console.log("Step 1");
-        return res.status(200).json(
-          new ApiResponse(
-            200,
-            {
-              updatedUserContest: userContest,
-              updatedOpponentContest: opponentContest,
-            },
-            "user contest with given id fetched successfully"
-          )
-        );
-      }
+      //   if (isMatchEnded && userContest[0].result != null) {
+      //     // console.log("Step 1");
+      //     return res.status(200).json(
+      //       new ApiResponse(
+      //         200,
+      //         {
+      //           updatedUserContest: userContest,
+      //           updatedOpponentContest: opponentContest,
+      //         },
+      //         "user contest with given id fetched successfully"
+      //       )
+      //     );
+      //   }
 
       const fantasyPoints = await axios.get(fantasyMatchPointsApiUrl);
       //   console.log(fantasyMatchPointsApiUrl);
       //   console.log("++++++++", fantasyPoints.data.data.bbb);
       if (fantasyPoints.data.status === "success") {
-        // const isMatchEnded = fantasyPoints?.data?.matchEnded;
-        // if (isMatchEnded && userContest[0].result != null) {
-        //   return res.status(200).json(
-        //     new ApiResponse(
-        //       200,
-        //       {
-        //         updatedUserContest: userContest,
-        //         updatedOpponentContest: opponentContest,
-        //       },
-        //       "user contest with given id fetched successfully"
-        //     )
-        //   );
-        // }
+        const isMatchEnded = fantasyPoints?.data?.matchEnded;
+        const matchId = userContest[0].matchDetails.matchId;
+        const data = await Match.findOneAndUpdate(
+          { matchId: matchId },
+          {
+            $set: {
+              matchStarted: true,
+              matchEnded: isMatchEnded,
+            },
+          },
+          { new: true }
+        );
+        if (isMatchEnded && userContest[0].result != null) {
+          return res.status(200).json(
+            new ApiResponse(
+              200,
+              {
+                updatedUserContest: userContest,
+                updatedOpponentContest: opponentContest,
+              },
+              "user contest with given id fetched successfully"
+            )
+          );
+        }
 
         //NOTE: matching both user11 and fantasy data to calculate match points
         const n = userContest[0]?.n || opponentContest[0]?.n;
