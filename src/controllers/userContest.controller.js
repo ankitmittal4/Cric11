@@ -1007,8 +1007,8 @@ const updateUserContestsById = asyncHandler(async (req, res) => {
         const user11 = userContest[0].user11;
         const opponent11 = opponentContest[0].user11;
 
-        let totalPointsOfUser = 0;
-        let totalPointsOfOpponent = 0;
+        let totalPointsOfUser = userContest[0]?.points;
+        let totalPointsOfOpponent = opponentContest[0]?.points;
         // let totalPointsOfUser = userContest[0].points;
         // let totalPointsOfOpponent = opponentContest[0].points;
         const updatedUserPlayers = user11.map((player) => {
@@ -1023,7 +1023,7 @@ const updateUserContestsById = asyncHandler(async (req, res) => {
           totalPointsOfUser += points;
           return {
             id: player.id,
-            points: points,
+            points: points + player.points,
           };
         });
         const updatedOpponentPlayers = opponent11.map((player) => {
@@ -1039,7 +1039,7 @@ const updateUserContestsById = asyncHandler(async (req, res) => {
           return {
             // ...(player.toObject ? player.toObject() : player),
             id: player.id,
-            points: points,
+            points: points + player.points,
           };
         });
 
