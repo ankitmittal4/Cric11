@@ -13,7 +13,7 @@ const createUserContest = async (req, res, next) => {
     const { _id } = req.user;
     const contest = await Contest.findById(req.body.contestId);
     const { contestId, players, captain, viceCaptain } = req.body;
-    console.log(players);
+    // console.log(players);
     const updatedPlayers = players.map((playerId) => ({
       id: playerId,
       //   points: 0,
@@ -581,7 +581,6 @@ const updateUserContestsById = asyncHandler(async (req, res) => {
   try {
     const { id, opponentId } = req.body;
     const userId = req.user.id;
-
     const userContest = await UserContest.aggregate([
       {
         $match: { _id: new mongoose.Types.ObjectId(id) },
@@ -912,7 +911,6 @@ const updateUserContestsById = asyncHandler(async (req, res) => {
 
     // const matchInfoApiEndpoint = "match_info";
     // const matchInfoApiUrl = `${process.env.API_URL}${matchInfoApiEndpoint}?apikey=${process.env.API_KEY}&id=${matchId}`;
-
     try {
       //   const matchInfo = await axios.get(matchInfoApiUrl);
       //   const isMatchEnded = matchInfo.data.data.matchEnded;
@@ -949,10 +947,13 @@ const updateUserContestsById = asyncHandler(async (req, res) => {
       //   }
 
       const fantasyPoints = await axios.get(fantasyMatchPointsApiUrl);
+      //   console.log("Step 3");
       //   console.log(fantasyMatchPointsApiUrl);
       //   console.log("++++++++", fantasyPoints.data.data.bbb);
       if (fantasyPoints.data.status === "success") {
-        const isMatchEnded = fantasyPoints?.data?.matchEnded;
+        // console.log("Step 4");
+        const isMatchEnded = fantasyPoints?.data?.data?.matchEnded;
+        // console.log("Res: ", fantasyPoints?.data.data.matchEnded);
         const matchId = userContest[0].matchDetails.matchId;
         const data = await Match.findOneAndUpdate(
           { matchId: matchId },
@@ -1046,6 +1047,7 @@ const updateUserContestsById = asyncHandler(async (req, res) => {
         //update points and result in database
         let userResult;
         let opponentResult;
+        console.log("IsmatchEnded: ", isMatchEnded);
         if (isMatchEnded) {
           if (totalPointsOfUser > totalPointsOfOpponent) {
             userResult = "win";
