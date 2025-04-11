@@ -12,13 +12,13 @@ const transactionSchema = new Schema(
     },
     transactionType: {
       type: String,
-      enum: ["Deposit", "Withdrawal"],
+      enum: ["debit", "credit"],
       required: true,
     },
     transactionStatus: {
       type: String,
-      enum: ["Pending", "Success", "Failed"],
-      default: "Pending",
+      enum: ["pending", "success", "failed"],
+      default: "pending",
     },
   },
   { timestamps: true }
