@@ -49,8 +49,8 @@ const createUserContest = async (req, res, next) => {
     const transaction = await Transaction.create({
       userId: _id,
       amount: contest.entryFee,
-      transactionType: "Deposit",
-      transactionStatus: "Success",
+      transactionType: "debit",
+      transactionStatus: "success",
     });
 
     // Save the user contest
@@ -580,6 +580,8 @@ const getUserContestsById = asyncHandler(async (req, res) => {
 const updateUserContestsById = asyncHandler(async (req, res) => {
   try {
     const { id, opponentId } = req.body;
+    // console.log(id);
+    // console.log(opponentId);
     const userId = req.user.id;
     const userContest = await UserContest.aggregate([
       {
@@ -641,6 +643,7 @@ const updateUserContestsById = asyncHandler(async (req, res) => {
           },
           userContestData: "$userContestData",
           matchData: "$matchData",
+          userId: "$userId",
           captain: "$captain",
           viceCaptain: "$viceCaptain",
           points: "$points",
@@ -656,6 +659,7 @@ const updateUserContestsById = asyncHandler(async (req, res) => {
           },
           userContestData: "$userContestData",
           matchData: "$matchData",
+          userId: "$userId",
           captain: "$captain", // Include captain here as well
           viceCaptain: "$viceCaptain", // Include captain here as well
           points: "$points",
@@ -735,6 +739,7 @@ const updateUserContestsById = asyncHandler(async (req, res) => {
             matchStarted: "$matchData.matchStarted",
             matchEnded: "$matchData.matchStarted",
           },
+          userId: "$userId",
           captain: 1, // Keep this line to ensure captain is in the final response
           viceCaptain: 1,
           points: "$points",
@@ -743,6 +748,8 @@ const updateUserContestsById = asyncHandler(async (req, res) => {
         },
       },
     ]);
+    // console.log(userContest[0]?.userId);
+
     const opponentContest = await UserContest.aggregate([
       {
         $match: { _id: new mongoose.Types.ObjectId(opponentId) },
@@ -803,6 +810,7 @@ const updateUserContestsById = asyncHandler(async (req, res) => {
           },
           userContestData: "$userContestData",
           matchData: "$matchData",
+          userId: "$userId",
           captain: "$captain",
           viceCaptain: "$viceCaptain",
           points: "$points",
@@ -818,6 +826,7 @@ const updateUserContestsById = asyncHandler(async (req, res) => {
           },
           userContestData: "$userContestData",
           matchData: "$matchData",
+          userId: "$userId",
           captain: "$captain",
           viceCaptain: "$viceCaptain",
           points: "$points",
@@ -895,6 +904,7 @@ const updateUserContestsById = asyncHandler(async (req, res) => {
             // date: "$matchData.date",
             // startTime: "$matchData.startTime",
           },
+          userId: "$userId",
           captain: 1, // Keep this line to ensure captain is in the final response
           viceCaptain: 1,
           points: "$points",
@@ -908,6 +918,7 @@ const updateUserContestsById = asyncHandler(async (req, res) => {
     const matchId = userContest[0].matchDetails.matchId;
     const fantasyMatchatchPointsEndPoint = "match_bbb";
     const fantasyMatchPointsApiUrl = `${process.env.API_URL}${fantasyMatchatchPointsEndPoint}?apikey=${process.env.API_KEY}&id=${matchId}`;
+    // console.log(process.env.API_KEY);
 
     // const matchInfoApiEndpoint = "match_info";
     // const matchInfoApiUrl = `${process.env.API_URL}${matchInfoApiEndpoint}?apikey=${process.env.API_KEY}&id=${matchId}`;
@@ -965,6 +976,7 @@ const updateUserContestsById = asyncHandler(async (req, res) => {
           },
           { new: true }
         );
+        // console.log(data);
         if (isMatchEnded && userContest[0].result != null) {
           return res.status(200).json(
             new ApiResponse(
@@ -1047,16 +1059,39 @@ const updateUserContestsById = asyncHandler(async (req, res) => {
         //update points and result in database
         let userResult;
         let opponentResult;
-        console.log("IsmatchEnded: ", isMatchEnded);
+        // console.log("IsmatchEnded: ", isMatchEnded);
+        let winnerId;
         if (isMatchEnded) {
           if (totalPointsOfUser > totalPointsOfOpponent) {
             userResult = "win";
             opponentResult = "loose";
+            winnerId = userContest[0]?.userId;
           } else {
             userResult = "loose";
             opponentResult = "win";
+            winnerId = opponentContest[0]?.userId;
           }
+          const transaction = await Transaction.create({
+            userId: winnerId,
+            amount: userContest[0]?.contestDetails?.prizePool,
+            transactionType: "credit",
+            transactionStatus: "success",
+          });
         }
+
+        // if (isMatchEnded) {
+        //   if (userResult === "win") {
+        //     winnerId = id;
+        //   } else {
+        //     winnerId = opponentId;
+        //   }
+        //   const transaction = await Transaction.create({
+        //     userId: winnerId,
+        //     amount: contest.,
+        //     transactionType: "Deposit",
+        //     transactionStatus: "Success",
+        //   });
+        // }
 
         await UserContest.bulkWrite([
           {
