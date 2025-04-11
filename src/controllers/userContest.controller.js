@@ -543,6 +543,7 @@ const getUserContestsById = asyncHandler(async (req, res) => {
             teamA: "$matchData.teamA",
             teamB: "$matchData.teamB",
             matchType: "$matchData.matchType",
+            venue: "$matchData.venue",
             date: "$matchData.date",
             startTime: "$matchData.startTime",
           },
