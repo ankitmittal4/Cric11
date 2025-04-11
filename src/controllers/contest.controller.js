@@ -200,9 +200,11 @@ const createContest = asyncHandler(async (req, res) => {
     //FIXME: players database call
     const matchSquadApiEndpoint = "match_squad";
     const matchSquadApiUrl = `${process.env.API_URL}${matchSquadApiEndpoint}?apikey=${process.env.API_KEY}&id=${matchId}`;
+
     let matchSquadInfo;
     try {
       matchSquadInfo = await axios.get(matchSquadApiUrl);
+      //   console.log("Match Squad");
       if (matchSquadInfo?.data.status === "failure") {
         console.log("Error in match info api: ", matchSquadInfo?.data.reason);
         throw new ApiError(400, matchSquadInfo?.data.reason);
@@ -246,7 +248,7 @@ const createContest = asyncHandler(async (req, res) => {
       .status(201)
       .json(new ApiResponse(200, contest, "Contest created successfully"));
   } catch (error) {
-    console.log("Error in Ankit", error);
+    console.log("Error in Create contest", error);
   }
 });
 
