@@ -3,12 +3,14 @@ import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { Contest } from "../models/contest.model.js";
 import { Match } from "../models/match.model.js";
+import { Opponent } from "../models/opponent.model.js";
 import { Player } from "../models/player.model.js";
 import jwt from "jsonwebtoken";
 import axios from "axios";
 import mongoose from "mongoose";
 import { Transaction } from "../models/transaction.model.js";
 import { format, toZonedTime } from "date-fns-tz";
+import { UserContest } from "../models/userContest.model.js";
 
 const getAllContests = asyncHandler(async (req, res) => {
   try {
@@ -268,10 +270,19 @@ const deleteContest = asyncHandler(async (req, res) => {
     const removedSquad = await Player.findByIdAndDelete(
       removedContest.squadRef
     );
-    if (!removedMatch || !removedSquad) {
+    const removedOpponent = await Opponent.deleteOne({ contestId: id });
+    const removedUsercontest = await UserContest.deleteOne({ contestId: id });
+    // console.log("removedOpponent: ", removedOpponent);
+    // console.log("removedUsercontest: ", removedUsercontest);
+    if (
+      !removedMatch ||
+      !removedSquad ||
+      !removedOpponent ||
+      !removedUsercontest
+    ) {
       throw new ApiError(
         400,
-        "Match and Players with corresponding contest not found"
+        "Match, Players, Opponent, user contest with corresponding contest not found"
       );
     }
 
@@ -305,7 +316,7 @@ const updateContest = asyncHandler(async (req, res) => {
     if (!updateContest) {
       throw new ApiError(404, "Contest not found");
     }
-    console.log("UpdatedContest", updateContest);
+    // console.log("UpdatedContest", updateContest);
     res
       .status(200)
       .json(
