@@ -734,6 +734,7 @@ const updateUserContestsById = asyncHandler(async (req, res) => {
             teamA: "$matchData.teamA",
             teamB: "$matchData.teamB",
             matchType: "$matchData.matchType",
+            venue: "$matchData.venue",
             matchId: "$matchData.matchId",
             date: "$matchData.date",
             startTime: "$matchData.startTime",
@@ -919,7 +920,6 @@ const updateUserContestsById = asyncHandler(async (req, res) => {
     const matchId = userContest[0].matchDetails.matchId;
     const fantasyMatchatchPointsEndPoint = "match_bbb";
     const fantasyMatchPointsApiUrl = `${process.env.API_URL}${fantasyMatchatchPointsEndPoint}?apikey=${process.env.API_KEY}&id=${matchId}`;
-    // console.log(process.env.API_KEY);
 
     // const matchInfoApiEndpoint = "match_info";
     // const matchInfoApiUrl = `${process.env.API_URL}${matchInfoApiEndpoint}?apikey=${process.env.API_KEY}&id=${matchId}`;
@@ -995,7 +995,7 @@ const updateUserContestsById = asyncHandler(async (req, res) => {
         const n = userContest[0]?.n || opponentContest[0]?.n;
         const bbb = fantasyPoints?.data?.data?.bbb; //it is an array
         const filterbbb = bbb.filter((ball) => ball.n > n);
-
+        // console.log("BBB: ", filterbbb);
         // const filterbbb = bbb.slice(n);
         // console.log("Step 9");
         const fantasyDataLookup = filterbbb.reduce((acc, ball) => {
@@ -1015,10 +1015,12 @@ const updateUserContestsById = asyncHandler(async (req, res) => {
           }
           return acc;
         }, {});
+        // console.log(fantasyDataLookup);
         // console.log("Step 0: ", bbb);
         // console.log("Step 10");
         const updatedn = bbb[bbb.length - 1].n;
         const user11 = userContest[0].user11;
+        // console.log(user11);
         const opponent11 = opponentContest[0].user11;
 
         let totalPointsOfUser = userContest[0]?.points;
@@ -1038,15 +1040,16 @@ const updateUserContestsById = asyncHandler(async (req, res) => {
           return {
             id: player.id,
             points: points + player.points,
+            // points: 0,
           };
         });
         const updatedOpponentPlayers = opponent11.map((player) => {
           const playerId = player.id.toString();
           let points = fantasyDataLookup[playerId] || 0;
 
-          if (playerId === userContest[0].captain) {
+          if (playerId === opponentContest[0].captain) {
             points *= 2;
-          } else if (playerId === userContest[0].viceCaptain) {
+          } else if (playerId === opponentContest[0].viceCaptain) {
             points *= 1.5;
           }
           totalPointsOfOpponent += points;
@@ -1054,6 +1057,7 @@ const updateUserContestsById = asyncHandler(async (req, res) => {
             // ...(player.toObject ? player.toObject() : player),
             id: player.id,
             points: points + player.points,
+            // points: 0,
           };
         });
 
@@ -1270,6 +1274,7 @@ const updateUserContestsById = asyncHandler(async (req, res) => {
                 teamA: "$matchData.teamA",
                 teamB: "$matchData.teamB",
                 matchType: "$matchData.matchType",
+                venue: "$matchData.venue",
                 matchId: "$matchData.matchId",
                 date: "$matchData.date",
                 startTime: "$matchData.startTime",
