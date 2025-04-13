@@ -58,7 +58,7 @@ const upcomingMatches = asyncHandler(async (req, res) => {
 const getAllMatches = asyncHandler(async (req, res) => {
   try {
     const matches = await Match.find();
-    // console.log("All Matches: ", contests);
+    // console.log("All Matches: ", matches);
     res
       .status(200)
       .json(new ApiResponse(200, matches, "All matches fetched successfully"));
