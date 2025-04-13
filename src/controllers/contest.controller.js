@@ -130,6 +130,30 @@ const createContest = asyncHandler(async (req, res) => {
     ) {
       throw new ApiError(400, "All fields are required");
     }
+    const isMatchPresent = await Match.findOne({ matchId });
+    const matchSquad = await Player.findOne({ matchId });
+    // console.log("isMatchPresent: ", isMatchPresent);
+    if (isMatchPresent) {
+      const contest = await Contest.create({
+        matchId,
+        entryFee,
+        prizePool,
+        maxParticipants,
+        matchRef: isMatchPresent._id,
+        squadRef: matchSquad._id,
+      });
+
+      if (!contest) {
+        throw new ApiError(
+          500,
+          "Something went wrong while creating a contest"
+        );
+      }
+
+      return res
+        .status(201)
+        .json(new ApiResponse(200, contest, "Contest created successfully"));
+    }
 
     //api call for matchInfo
     const matchInfoApiEndpoint = "match_info";
