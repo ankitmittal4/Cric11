@@ -21,6 +21,12 @@ const matchSchema = new Schema(
       type: String,
       required: true,
     },
+    teamAAcronym: {
+      type: String,
+    },
+    teamBAcronym: {
+      type: String,
+    },
     teamAImg: {
       type: String,
     },

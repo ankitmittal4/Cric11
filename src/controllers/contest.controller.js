@@ -160,6 +160,8 @@ const createContest = asyncHandler(async (req, res) => {
       entryFee,
       prizePool,
       maxParticipants,
+      t1,
+      t2,
       t1img,
       t2img,
       series,
@@ -223,8 +225,11 @@ const createContest = asyncHandler(async (req, res) => {
       matchEnded,
       matchStarted,
     } = matchInfo?.data?.data;
-    const teamA = teams[0];
-    const teamB = teams[1];
+    const teamA = t1.split(" [")[0];
+    const teamAAcronym = t1.match(/\[(.*?)\]/)?.[1];
+    const teamB = t2.split(" [")[0];
+    const teamBAcronym = t2.match(/\[(.*?)\]/)?.[1];
+
     const teamAImg = matchInfo?.data?.data?.teamInfo?.[0]?.img || t1img;
     const teamBImg = matchInfo?.data?.data?.teamInfo?.[1]?.img || t2img;
 
@@ -235,7 +240,7 @@ const createContest = asyncHandler(async (req, res) => {
     const formattedIstMatchDate = format(istMatchDate, "yyyy-MM-dd", {
       timeZone: "Asia/Kolkata",
     });
-    const formattedIstMatchTime = format(istMatchDate, "HH:mm:ss", {
+    const formattedIstMatchTime = format(istMatchDate, "HH:mm", {
       timeZone: "Asia/Kolkata",
     });
     const date = formattedIstMatchDate;
@@ -253,6 +258,8 @@ const createContest = asyncHandler(async (req, res) => {
       name,
       teamA,
       teamB,
+      teamAAcronym,
+      teamBAcronym,
       teamAImg,
       teamBImg,
       series,
