@@ -12,13 +12,42 @@ import { Transaction } from "../models/transaction.model.js";
 import { format, toZonedTime } from "date-fns-tz";
 import { UserContest } from "../models/userContest.model.js";
 
+const getAllContestsOfGivenMatch = asyncHandler(async (req, res) => {
+  const { id } = req.body;
+  try {
+    const contests = await Contest.aggregate([
+      {
+        $match: { matchRef: new mongoose.Types.ObjectId(id) },
+      },
+      {
+        $lookup: {
+          from: "matches",
+          localField: "matchRef",
+          foreignField: "_id",
+          as: "match",
+        },
+      },
+      {
+        $unwind: "$match",
+      },
+    ]);
+
+    // console.log("All Contests of given match: ", contests);
+    res
+      .status(200)
+      .json(
+        new ApiResponse(
+          200,
+          contests,
+          "All contests of given match fetched successfully"
+        )
+      );
+  } catch (error) {
+    throw new ApiError(500, "Error while fetching contests of given match");
+  }
+});
 const getAllContests = asyncHandler(async (req, res) => {
   try {
-    // const contests = await Contest.find().populate(
-    //   "matchRef",
-    //   "matchType name teamA teamB startTime venue"
-    // );
-
     const contests = await Contest.aggregate([
       {
         $lookup: {
@@ -33,14 +62,18 @@ const getAllContests = asyncHandler(async (req, res) => {
       },
     ]);
 
-    // console.log("All Contests: ", contests);
+    // console.log("All Contests of given match: ", contests);
     res
       .status(200)
       .json(
-        new ApiResponse(200, contests, "All contests fetched successfully")
+        new ApiResponse(
+          200,
+          contests,
+          "All contests of given match fetched successfully"
+        )
       );
   } catch (error) {
-    throw new ApiError(500, "Error while fetching contests");
+    throw new ApiError(500, "Error while fetching contests of given match");
   }
 });
 const getContestById = asyncHandler(async (req, res) => {
@@ -283,6 +316,10 @@ const deleteContest = asyncHandler(async (req, res) => {
     const { id } = req.body;
 
     const removedContest = await Contest.findByIdAndDelete(id);
+    const isAnotherContestPresent = await Contest.findOne({
+      matchRef: removedContest.matchRef,
+    });
+    // console.log("isAnotherContestPresent: ", isAnotherContestPresent);
 
     // console.log("removedContest: ", removedContest);
 
@@ -294,21 +331,24 @@ const deleteContest = asyncHandler(async (req, res) => {
     const removedSquad = await Player.findByIdAndDelete(
       removedContest.squadRef
     );
-    const removedOpponent = await Opponent.deleteOne({ contestId: id });
-    const removedUsercontest = await UserContest.deleteOne({ contestId: id });
+    if (!isAnotherContestPresent) {
+      console.log("More than 1 contest found for this ");
+      const removedOpponent = await Opponent.deleteOne({ contestId: id });
+      const removedUsercontest = await UserContest.deleteOne({ contestId: id });
+    }
     // console.log("removedOpponent: ", removedOpponent);
     // console.log("removedUsercontest: ", removedUsercontest);
-    if (
-      !removedMatch ||
-      !removedSquad ||
-      !removedOpponent ||
-      !removedUsercontest
-    ) {
-      throw new ApiError(
-        400,
-        "Match, Players, Opponent, user contest with corresponding contest not found"
-      );
-    }
+    // if (
+    //   !removedMatch ||
+    //   !removedSquad ||
+    //   !removedOpponent ||
+    //   !removedUsercontest
+    // ) {
+    //   throw new ApiError(
+    //     400,
+    //     "Match, Players, Opponent, user contest with corresponding contest not found"
+    //   );
+    // }
 
     res
       .status(200)
@@ -353,6 +393,7 @@ const updateContest = asyncHandler(async (req, res) => {
 });
 
 export {
+  getAllContestsOfGivenMatch,
   getAllContests,
   getContestById,
   createContest,
