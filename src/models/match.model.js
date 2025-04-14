@@ -27,6 +27,9 @@ const matchSchema = new Schema(
     teamBImg: {
       type: String,
     },
+    series: {
+      type: String,
+    },
     date: {
       type: String,
     },

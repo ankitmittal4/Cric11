@@ -155,7 +155,16 @@ const getContestById = asyncHandler(async (req, res) => {
 
 const createContest = asyncHandler(async (req, res) => {
   try {
-    const { matchId, entryFee, prizePool, maxParticipants } = req.body;
+    const {
+      matchId,
+      entryFee,
+      prizePool,
+      maxParticipants,
+      t1img,
+      t2img,
+      series,
+    } = req.body;
+    console.log(series);
     if (
       [matchId, entryFee, prizePool, maxParticipants].some(
         (field) => field?.trim() === ""
@@ -216,8 +225,8 @@ const createContest = asyncHandler(async (req, res) => {
     } = matchInfo?.data?.data;
     const teamA = teams[0];
     const teamB = teams[1];
-    const teamAImg = matchInfo?.data?.data?.teamInfo?.[0]?.img;
-    const teamBImg = matchInfo?.data?.data?.teamInfo?.[1]?.img;
+    const teamAImg = matchInfo?.data?.data?.teamInfo?.[0]?.img || t1img;
+    const teamBImg = matchInfo?.data?.data?.teamInfo?.[1]?.img || t2img;
 
     //convert time
     const matchTimeGMT = dateTimeGMT;
@@ -246,6 +255,7 @@ const createContest = asyncHandler(async (req, res) => {
       teamB,
       teamAImg,
       teamBImg,
+      series,
       date,
       startTime,
       venue,
