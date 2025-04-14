@@ -319,7 +319,7 @@ const deleteContest = asyncHandler(async (req, res) => {
     const isAnotherContestPresent = await Contest.findOne({
       matchRef: removedContest.matchRef,
     });
-    // console.log("isAnotherContestPresent: ", isAnotherContestPresent);
+    console.log("isAnotherContestPresent: ", isAnotherContestPresent);
 
     // console.log("removedContest: ", removedContest);
 
@@ -327,14 +327,17 @@ const deleteContest = asyncHandler(async (req, res) => {
       throw new ApiError(400, "Removed Contest not found");
     }
 
-    const removedMatch = await Match.findByIdAndDelete(removedContest.matchRef);
-    const removedSquad = await Player.findByIdAndDelete(
-      removedContest.squadRef
-    );
+    const removedOpponent = await Opponent.deleteOne({ contestId: id });
+    const removedUsercontest = await UserContest.deleteOne({ contestId: id });
+
     if (!isAnotherContestPresent) {
-      console.log("More than 1 contest found for this ");
-      const removedOpponent = await Opponent.deleteOne({ contestId: id });
-      const removedUsercontest = await UserContest.deleteOne({ contestId: id });
+      //   console.log("More than 1 contest Not found for this ");
+      const removedMatch = await Match.findByIdAndDelete(
+        removedContest.matchRef
+      );
+      const removedSquad = await Player.findByIdAndDelete(
+        removedContest.squadRef
+      );
     }
     // console.log("removedOpponent: ", removedOpponent);
     // console.log("removedUsercontest: ", removedUsercontest);
