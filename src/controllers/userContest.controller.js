@@ -1003,7 +1003,7 @@ const updateUserContestsById = asyncHandler(async (req, res) => {
           acc[ball?.bowler?.id] = acc[ball?.bowler?.id] || 0;
 
           if (ball?.dismissal) {
-            acc[ball?.bowler.id] += 10;
+            acc[ball?.bowler.id] += 30;
           } else if (ball?.penalty) {
             acc[ball?.bowler.id] -= ball?.extras || 0;
           } else {
