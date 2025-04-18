@@ -13,7 +13,7 @@ const createUserContest = async (req, res, next) => {
     const { _id } = req.user;
     const contest = await Contest.findById(req.body.contestId);
     const { contestId, players, captain, viceCaptain } = req.body;
-    // console.log(players);
+    // console.log("Players: ",players);
     const updatedPlayers = players.map((playerId) => ({
       id: playerId,
       //   points: 0,
