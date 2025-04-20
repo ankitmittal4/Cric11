@@ -9,7 +9,7 @@ import mongoose, { Mongoose } from "mongoose";
 import axios from "axios";
 import { Match } from "../models/match.model.js";
 const createUserContest = async (req, res, next) => {
-  try { 
+  try {
     const { _id } = req.user;
     const contest = await Contest.findById(req.body.contestId);
     const { contestId, players, captain, viceCaptain } = req.body;
