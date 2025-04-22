@@ -31,7 +31,6 @@ const getAllContestsOfGivenMatch = asyncHandler(async (req, res) => {
         $unwind: "$match",
       },
     ]);
-
     // console.log("All Contests of given match: ", contests);
     res
       .status(200)
