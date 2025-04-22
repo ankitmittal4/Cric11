@@ -32,6 +32,7 @@ const getAllContestsOfGivenMatch = asyncHandler(async (req, res) => {
       },
     ]);
     // console.log("All Contests of given match: ", contests);
+    // console.log("All Contests of given match: ", contests);
     res
       .status(200)
       .json(
