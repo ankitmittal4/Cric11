@@ -9,7 +9,7 @@ import mongoose, { Mongoose } from "mongoose";
 import axios from "axios";
 import { Match } from "../models/match.model.js";
 const createUserContest = async (req, res, next) => {
-  try { 
+  try {
     const { _id } = req.user;
     const contest = await Contest.findById(req.body.contestId);
     const { contestId, players, captain, viceCaptain } = req.body;
@@ -349,11 +349,14 @@ const getAllUserContests = asyncHandler(async (req, res) => {
             name: "$matchData.name",
             teamA: "$matchData.teamA",
             teamB: "$matchData.teamB",
+            series: "$matchData.series",
             matchType: "$matchData.matchType",
             date: "$matchData.date",
             startTime: "$matchData.startTime",
             teamAImg: "$matchData.teamAImg",
             teamBImg: "$matchData.teamBImg",
+            teamAAcronym: "$matchData.teamAAcronym",
+            teamBAcronym: "$matchData.teamBAcronym",
             matchEnded: "$matchData.matchEnded",
             matchStarted: "$matchData.matchStarted",
           },
@@ -541,6 +544,7 @@ const getUserContestsById = asyncHandler(async (req, res) => {
           user11: "$playing11",
           matchDetails: {
             name: "$matchData.name",
+            series: "$matchData.series",
             teamA: "$matchData.teamA",
             teamB: "$matchData.teamB",
             matchType: "$matchData.matchType",
