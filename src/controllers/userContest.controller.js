@@ -551,6 +551,8 @@ const getUserContestsById = asyncHandler(async (req, res) => {
             venue: "$matchData.venue",
             date: "$matchData.date",
             startTime: "$matchData.startTime",
+            matchStarted: "$matchData.matchStarted",
+            matchEnded: "$matchData.matchEnded",
           },
           userId: 1,
           captain: 1,
