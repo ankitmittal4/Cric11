@@ -341,9 +341,7 @@ const deleteContest = asyncHandler(async (req, res) => {
     const isAnotherContestPresent = await Contest.findOne({
       matchRef: removedContest.matchRef,
     });
-    console.log("isAnotherContestPresent: ", isAnotherContestPresent);
 
-    // console.log("removedContest: ", removedContest);
 
     if (!removedContest) {
       throw new ApiError(400, "Removed Contest not found");
