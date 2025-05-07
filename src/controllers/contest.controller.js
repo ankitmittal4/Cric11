@@ -171,7 +171,7 @@ const createContest = asyncHandler(async (req, res) => {
       t2img,
       series,
     } = req.body;
-    console.log(series);
+    // console.log(series);
     if (
       [matchId, entryFee, prizePool, maxParticipants].some(
         (field) => field?.trim() === ""
