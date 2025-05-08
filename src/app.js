@@ -27,7 +27,7 @@ import teamRouter from "./routes/team.routes.js";
 import userContestRouter from "./routes/userContest.routes.js";
 import OpponentRouter from "./routes/opponent.routes.js";
 import TransactionRouter from "./routes/transaction.routes.js";
-import payment from "./routes/payment.js";
+import payment from "./routes/payment.routes.js";
 
 
 //routes declaration

@@ -1,14 +1,11 @@
-import express from 'express';
 import Razorpay from 'razorpay';
-
-const router = express.Router();
 
 const razorpay = new Razorpay({
     key_id: process.env.RAZORPAY_ID_KEY,
     key_secret: process.env.RAZORPAY_SECRET_KEY,
 });
 
-router.post('/create-order', async (req, res) => {
+const payment = asyncHandler(async (req, res) => {
     const { amount, currency = 'INR', receipt = 'receipt#1' } = req.body;
 
     try {
@@ -25,4 +22,4 @@ router.post('/create-order', async (req, res) => {
     }
 });
 
-export default router;
+export default payment;
