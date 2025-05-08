@@ -27,6 +27,8 @@ import teamRouter from "./routes/team.routes.js";
 import userContestRouter from "./routes/userContest.routes.js";
 import OpponentRouter from "./routes/opponent.routes.js";
 import TransactionRouter from "./routes/transaction.routes.js";
+import payment from "./routes/payment.js";
+
 
 //routes declaration
 app.use("/api/v1/users", userRouter);
@@ -38,6 +40,8 @@ app.use("/api/v1/team", teamRouter);
 app.use("/api/v1/user-contest", userContestRouter);
 app.use("/api/v1/opponent", OpponentRouter);
 app.use("/api/v1/transactions", TransactionRouter);
+
+app.use('/api/v1/payment', payment)
 
 app.get("/", (req, res) => {
   res.send("<h1>Backend server is running</h1>");
