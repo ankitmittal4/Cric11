@@ -63,7 +63,28 @@ const verifyPayment = asyncHandler(async (req, res) => {
         res.status(200).json({ success: true, message: "Payment verified and wallet updated" });
     } catch (error) {
         console.error(error);
+
         res.status(500).json({ success: false, message: "Payment verification failed" });
     }
 });
-export { payment, verifyPayment };
+const failedPayment = asyncHandler(async (req, res) => {
+    try {
+        const { _id } = req.user;
+        const { code, source, description, reason, order_id, payment_id, amount } = req.body;
+
+        const user = await User.findById(_id);
+
+        const transaction = await Transaction.create({
+            userId: _id,
+            amount: Number(amount),
+            transactionType: "credit",
+            transactionStatus: "failed",
+        });
+        res.status(200).json({ success: true, message: "Payment failed successfully" });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: "Payment failed unsuccessfully" });
+    }
+});
+
+export { payment, verifyPayment, failedPayment };
