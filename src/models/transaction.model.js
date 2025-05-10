@@ -6,6 +6,10 @@ const transactionSchema = new Schema(
       type: Schema.Types.ObjectId,
       ref: "User",
     },
+    transactionId: {
+      type: String,
+      // required: true,
+    },
     amount: {
       type: Number,
       required: true,

@@ -52,7 +52,7 @@ const createUserContest = async (req, res, next) => {
       amount: contest.entryFee,
       transactionType: "debit",
       transactionStatus: "success",
-      message: "Contest Joinded"
+      message: "Contest Joined"
     });
 
     // Save the user contest
