@@ -77,7 +77,7 @@ const failedPayment = asyncHandler(async (req, res) => {
 
         const user = await User.findById(_id);
 
-        const transactionId = razorpay_payment_id.slice(4);
+        const transactionId = payment_id.slice(4);
         const transaction = await Transaction.create({
             userId: _id,
             transactionId: transactionId,
