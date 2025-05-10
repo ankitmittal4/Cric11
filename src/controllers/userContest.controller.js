@@ -52,6 +52,7 @@ const createUserContest = async (req, res, next) => {
       amount: contest.entryFee,
       transactionType: "debit",
       transactionStatus: "success",
+      message: "Contest Joinded"
     });
 
     // Save the user contest
@@ -1098,6 +1099,7 @@ const updateUserContestsById = asyncHandler(async (req, res) => {
             amount: userContest[0]?.contestDetails?.prizePool,
             transactionType: "credit",
             transactionStatus: "success",
+            message: "Contest Winning",
           });
         }
 

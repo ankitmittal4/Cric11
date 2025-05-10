@@ -59,6 +59,7 @@ const verifyPayment = asyncHandler(async (req, res) => {
             amount: Number(amount),
             transactionType: "credit",
             transactionStatus: "success",
+            message: "Added Money",
         });
         res.status(200).json({ success: true, message: "Payment verified and wallet updated" });
     } catch (error) {
@@ -77,8 +78,9 @@ const failedPayment = asyncHandler(async (req, res) => {
         const transaction = await Transaction.create({
             userId: _id,
             amount: Number(amount),
-            transactionType: "credit",
+            transactionType: "nothing",
             transactionStatus: "failed",
+            message: "Added Money",
         });
         res.status(200).json({ success: true, message: "Payment failed successfully" });
     } catch (error) {
