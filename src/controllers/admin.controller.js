@@ -51,9 +51,7 @@ const registerAdmin = asyncHandler(async (req, res) => {
 
 const loginAdmin = asyncHandler(async (req, res) => {
     const { username, email, password } = req.body;
-    // console.log("email: ", email);
-    // console.log("username: ", username);
-    // console.log("password: ", password);
+
     if (!username && !email) {
         throw new ApiError(400, "No username or email");
     }

@@ -37,6 +37,7 @@ adminSchema.pre("save", async function (next) {
 });
 
 adminSchema.methods.isPasswordCorrect = async function (password) {
+    // comparing both passwords
     return await bcrypt.compare(password, this.password);
 };
 
