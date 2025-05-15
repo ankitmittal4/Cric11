@@ -93,5 +93,29 @@ const loginAdmin = asyncHandler(async (req, res) => {
         );
 });
 
+const logoutAdmin = asyncHandler(async (req, res) => {
+    await Admin.findByIdAndUpdate(
+        req.admin._id,
+        {
+            $unset: {
+                refreshToken: 1,
+            },
+        },
+        {
+            new: true,
+        }
+    );
+    const options = {
+        httpOnly: true,
+        secure: true,
+    };
 
-export { loginAdmin, registerAdmin };
+    return res
+        .status(200)
+        .clearCookie("accessToken", options)
+        .clearCookie("refreshToken", options)
+        .json(new ApiResponse(200, {}, "Admin logged out successfully"));
+});
+
+
+export { loginAdmin, registerAdmin, logoutAdmin };
