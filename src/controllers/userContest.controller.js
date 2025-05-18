@@ -276,6 +276,7 @@ const updateTeam = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Error while updating team");
   }
 });
+
 const getAllUserContests = asyncHandler(async (req, res) => {
   try {
     const userId = req.user.id;
@@ -373,7 +374,7 @@ const getAllUserContests = asyncHandler(async (req, res) => {
     // console.log("All userContests: ", userContests);
     if (!userContests || userContests.length === 0) {
       return res
-        .status(404)
+        .status(200)
         .json({ message: "No contests found for this user." });
     }
     res
