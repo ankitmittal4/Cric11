@@ -748,6 +748,7 @@ const updateUserContestsById = asyncHandler(async (req, res) => {
           user11: "$playing11",
           matchDetails: {
             name: "$matchData.name",
+            series: "$matchData.series",
             teamA: "$matchData.teamA",
             teamB: "$matchData.teamB",
             teamAAcronym: "$matchData.teamAAcronym",
@@ -1312,6 +1313,8 @@ const updateUserContestsById = asyncHandler(async (req, res) => {
             },
           },
         ]);
+        // console.log(updatedUserContest);
+
         const updatedOpponentContest = await UserContest.aggregate([
           {
             $match: { _id: new mongoose.Types.ObjectId(opponentId) },
