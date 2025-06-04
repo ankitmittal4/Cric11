@@ -598,7 +598,7 @@ const getUserContestsById = asyncHandler(async (req, res) => {
 const updateUserContestsById = asyncHandler(async (req, res) => {
   try {
     const { id, opponentId } = req.body;
-    // console.log(id);
+    // console.log("Step1");
     // console.log(opponentId);
     const userId = req.user.id;
     const userContest = await UserContest.aggregate([
@@ -979,7 +979,7 @@ const updateUserContestsById = asyncHandler(async (req, res) => {
       //   }
 
       const fantasyPoints = await axios.get(fantasyMatchPointsApiUrl);
-      //   console.log("Step 3");
+      // console.log("Step 2");
       //   console.log(fantasyMatchPointsApiUrl);
       //   console.log("++++++++", fantasyPoints.data.data.bbb);
       if (fantasyPoints.data.status === "success") {

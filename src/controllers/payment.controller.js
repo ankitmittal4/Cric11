@@ -54,10 +54,12 @@ const verifyPayment = asyncHandler(async (req, res) => {
             { new: true }
         );
 
-        const transactionId = razorpay_payment_id.slice(4);
+        const transactionId = razorpay_payment_id;
+        const orderId = razorpay_order_id;
         const transaction = await Transaction.create({
             userId: _id,
             transactionId: transactionId,
+            orderId: orderId,
             amount: Number(amount),
             transactionType: "credit",
             transactionStatus: "success",
@@ -77,10 +79,12 @@ const failedPayment = asyncHandler(async (req, res) => {
 
         const user = await User.findById(_id);
 
-        const transactionId = payment_id.slice(4);
+        const transactionId = payment_id;
+        const orderId = razorpay_order_id;
         const transaction = await Transaction.create({
             userId: _id,
             transactionId: transactionId,
+            orderId: orderId,
             amount: Number(amount),
             transactionType: "nothing",
             transactionStatus: "failed",
