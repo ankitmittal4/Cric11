@@ -1,9 +1,7 @@
 import nodemailer from 'nodemailer';
 
-// const nodemailer = require("nodemailer");
-
 const sendConfirmationEmail = async (req, res) => {
-    const { email, name } = req.body;
+    const { email, name, amount } = req.body;
 
     try {
         const transporter = nodemailer.createTransport({
@@ -19,8 +17,13 @@ const sendConfirmationEmail = async (req, res) => {
             to: email,
             subject: "Payment Confirmation",
             html: `<h2>Hello ${name},</h2>
-             <p>Thank you for registering. Please confirm your email by clicking the link below:</p>
-             <a href="http://localhost:3000/confirm?email=${email}">Confirm Email</a>`,
+                <p>Thank you for your payment.</p>
+                <p><strong>Amount:</strong> ₹${amount}</p>
+                <p>Your transaction was successful. If you have any questions, feel free to contact our support team.</p>
+                <br/>
+                <p>Best regards,</p>
+                <p><strong>Cric11 Team</strong></p>`
+
         };
 
         await transporter.sendMail(mailOptions);
