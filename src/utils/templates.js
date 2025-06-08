@@ -5,15 +5,24 @@ const getEmailTemplate = (type, data) => {
             return {
                 subject: "Login Alert",
                 html: `<h2>Hello ${data.name},</h2>
-                 <p>You have successfully logged in at ${data.time}.</p>`,
+                 <p>You have successfully logged in at ${data.time}.</p>
+                 <br/>
+                 <p>Best regards,</p>
+                 <p><strong>Cric11 Team</strong></p>`,
+
             };
 
         case "payment-success":
             return {
                 subject: "Payment Successful",
                 html: `<h2>Hello ${data.name},</h2>
-                 <p>Thank you for your payment of ₹${data.amount}.</p>
-                 <p>Your transaction ID: ${data.transactionId}</p>`,
+                 <p>Thank you for your payment.</p>
+                 <p><strong>Amount:</strong> ₹${data.amount}</p>
+                 <p>Your transaction ID: ${data.transactionId}</p>
+                 <p>Your transaction was successful. If you have any questions, feel free to contact our support team.</p>
+                 <br/>
+                 <p>Best regards,</p>
+                 <p><strong>Cric11 Team</strong></p>`
             };
 
         case "payment-failed":
@@ -21,7 +30,10 @@ const getEmailTemplate = (type, data) => {
                 subject: "Payment Failed",
                 html: `<h2>Hello ${data.name},</h2>
                  <p>Your payment of ₹${data.amount} failed.</p>
-                 <p>Reason: ${data.reason}</p>`,
+                 <p>Reason: ${data.reason}</p>
+                 <br/>
+                 <p>Best regards,</p>
+                 <p><strong>Cric11 Team</strong></p>`,
             };
 
         case "contest-win":
@@ -29,13 +41,19 @@ const getEmailTemplate = (type, data) => {
                 subject: "🎉 Congratulations! You Won a Contest",
                 html: `<h2>Hi ${data.name},</h2>
                  <p>You have won ₹${data.winnings} in the contest <strong>${data.contestName}</strong>.</p>
-                 <p>Keep playing and winning!</p>`,
+                 <p>Keep playing and winning!</p>
+                 <br/>
+                 <p>Best regards,</p>
+                 <p><strong>Cric11 Team</strong></p>`,
             };
 
         default:
             return {
                 subject: "Notification",
-                html: `<p>Hello ${data.name}, this is a default message.</p>`,
+                html: `<p>Hello ${data.name}, this is a default message.</p>
+                 <br/>
+                 <p>Best regards,</p>
+                 <p><strong>Cric11 Team</strong></p>`,
             };
     }
 };
