@@ -1,5 +1,5 @@
 import nodemailer from "nodemailer";
-import { getEmailTemplate } from "./templates";
+import { getEmailTemplate } from "./templates.js";
 
 const transporter = nodemailer.createTransport({
     service: "gmail",
@@ -13,7 +13,7 @@ const sendEmail = async (to, type, data) => {
     const { subject, html } = getEmailTemplate(type, data);
 
     const mailOptions = {
-        from: `"Your App" <${process.env.EMAIL_USER}>`,
+        from: `"Cric11" <${process.env.EMAIL_USER}>`,
         to,
         subject,
         html,
