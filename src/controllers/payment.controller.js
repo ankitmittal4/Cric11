@@ -1,4 +1,6 @@
 import { asyncHandler } from "../utils/asyncHandler.js";
+import { ApiError } from "../utils/ApiError.js";
+import { ApiResponse } from "../utils/ApiResponse.js";
 import { User } from "../models/user.model.js";
 import { Transaction } from "../models/transaction.model.js";
 import crypto from 'crypto';
@@ -19,6 +21,7 @@ const payment = asyncHandler(async (req, res) => {
             currency,
             receipt,
         };
+        console.log(options);
         const order = await razorpay.orders.create(options);
         if (!order) {
             return res.status(500).json({ success: false, message: 'Order creation failed' });
@@ -65,11 +68,21 @@ const verifyPayment = asyncHandler(async (req, res) => {
             transactionStatus: "success",
             message: "Added Money",
         });
-        res.status(200).json({ success: true, message: "Payment verified and wallet updated" });
+        // console.log(transaction);
+        // res.status(200).json({ success: true, message: "Payment verified and wallet updated" });
+        res
+            .status(200)
+            .json(
+                new ApiResponse(
+                    200,
+                    transaction,
+                    "Payment verified and wallet updated"
+                )
+            );
     } catch (error) {
         console.error(error);
-
-        res.status(500).json({ success: false, message: "Payment verification failed" });
+        throw new ApiError(500, "Payment verification failed");
+        // res.status(500).json({ success: false, message: "Payment verification failed" });
     }
 });
 const failedPayment = asyncHandler(async (req, res) => {
