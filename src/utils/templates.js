@@ -30,7 +30,8 @@ const getEmailTemplate = (type, data) => {
                 subject: "Payment Failed",
                 html: `<h2>Hello ${data.name},</h2>
                  <p>Your payment of ₹${data.amount} failed.</p>
-                 <p>Reason: ${data.reason}</p>
+                 <p>Transaction ID: ${data.transactionId}</p>
+                 <p>If you have any questions, feel free to contact our support team.</p>
                  <br/>
                  <p>Best regards,</p>
                  <p><strong>Cric11 Team</strong></p>`,
