@@ -35,10 +35,10 @@ const sendPaymentSuccessEmail = async (req, res) => {
 };
 
 const sendPaymentFailedEmail = async (req, res) => {
-    const { email, name, amount, reason } = req.body;
+    const { email, name, amount, transactionId } = req.body;
 
     try {
-        await sendEmail(email, "payment-failed", { name, amount, reason });
+        await sendEmail(email, "payment-failed", { name, amount, transactionId });
         res.status(200).json({ message: "Payment failed email sent successfully" });
     } catch (err) {
         res.status(500).json({ error: "Failed to send payment failed email" });
