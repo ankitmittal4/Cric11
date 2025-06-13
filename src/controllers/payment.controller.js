@@ -21,7 +21,7 @@ const payment = asyncHandler(async (req, res) => {
             currency,
             receipt,
         };
-        console.log(options);
+        // console.log(options);
         const order = await razorpay.orders.create(options);
         if (!order) {
             return res.status(500).json({ success: false, message: 'Order creation failed' });
@@ -88,7 +88,7 @@ const verifyPayment = asyncHandler(async (req, res) => {
 const failedPayment = asyncHandler(async (req, res) => {
     try {
         const { _id } = req.user;
-        const { code, source, description, reason, order_id, payment_id, amount } = req.body;
+        const { code, source, description, reason, order_id, payment_id, amount, razorpay_order_id } = req.body;
 
         const user = await User.findById(_id);
 
@@ -103,10 +103,20 @@ const failedPayment = asyncHandler(async (req, res) => {
             transactionStatus: "failed",
             message: "Added Money",
         });
-        res.status(200).json({ success: true, message: "Payment failed successfully" });
+        res
+            .status(200)
+            .json(
+                new ApiResponse(
+                    200,
+                    transaction,
+                    "Payment failed successfully"
+                )
+            );
+        // res.status(200).json({ success: true, message: "Payment failed successfully" });
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ success: false, message: "Payment failed unsuccessfully" });
+        console.error("Payment failed error: ", error);
+        // res.status(500).json({ success: false, message: "Payment failed unsuccessfully" });
+        throw new ApiError(500, "Payment failed");
     }
 });
 
