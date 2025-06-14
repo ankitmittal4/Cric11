@@ -52,9 +52,6 @@ const registerUser = asyncHandler(async (req, res) => {
 
 const loginUser = asyncHandler(async (req, res) => {
   const { username, email, password } = req.body;
-  // console.log("email: ", email);
-  // console.log("username: ", username);
-  // console.log("password: ", password);
   if (!username && !email) {
     throw new ApiError(400, "No username or email");
   }
@@ -173,7 +170,7 @@ const getUserWalletBalance = asyncHandler(async (req, res) => {
     if (!user) {
       throw new ApiError(404, "User not found");
     }
-    // console.log(user);
+
     const { walletBalance } = user;
     res
       .status(200)
