@@ -16,6 +16,7 @@ const generateAccessAndRefreshToken = async (userId) => {
     throw new ApiError(500, "Something went wrong");
   }
 };
+
 const registerUser = asyncHandler(async (req, res) => {
   const { username, email, fullName, password } = req.body;
   console.log("email: ", email);
