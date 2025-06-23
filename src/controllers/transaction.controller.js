@@ -15,7 +15,6 @@ const getAllTransactions = asyncHandler(async (req, res) => {
     ]);
     const user = await User.findById(userId);
     const { walletBalance } = user;
-    // console.log("Balance", walletBalance);
     if (transactions.length === 0) {
       return res
         .status(404)

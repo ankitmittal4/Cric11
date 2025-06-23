@@ -55,10 +55,10 @@ const upcomingMatches = asyncHandler(async (req, res) => {
     throw new ApiError(500, "Error while fetching upcoming matches");
   }
 });
+
 const getAllMatches = asyncHandler(async (req, res) => {
   try {
     const matches = await Match.find();
-    // console.log("All Matches: ", matches);
     res
       .status(200)
       .json(new ApiResponse(200, matches, "All matches fetched successfully"));
@@ -67,12 +67,11 @@ const getAllMatches = asyncHandler(async (req, res) => {
     throw new ApiError(500, "Error while fetching matches");
   }
 });
+
 const getMatchById = asyncHandler(async (req, res) => {
   try {
-    // console.log("req.params: ", req.params);
     const { id } = req.body;
     const match = await Match.findById(id);
-    // console.log("Contest with given id: ", contest);
     if (!match) {
       throw new ApiError(400, "Match not found");
     }
@@ -117,11 +116,8 @@ const createMatch = asyncHandler(async (req, res) => {
 
 const deleteMatch = asyncHandler(async (req, res) => {
   try {
-    // console.log("req.params: ", req.params);
     const { id } = req.body;
-    // console.log("id: ", id);
     const removedMatch = await Match.findByIdAndDelete(id);
-    // console.log("removed contest: ", removedContest);
 
     if (!removedMatch) {
       throw new ApiError(400, "Removed Match not found");

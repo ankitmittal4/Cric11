@@ -11,7 +11,6 @@ const getAllPlayers = asyncHandler(async (req, res) => {
       "teamA teamB startTime"
     );
     console.log("players: ", players);
-    // .populate("teamId", "teamName");
     if (!players) {
       throw new ApiError(400, "Players not found");
     }
@@ -30,7 +29,6 @@ const getPlayerById = asyncHandler(async (req, res) => {
       "matchId",
       "teamA teamB startTime"
     );
-    // .populate("teamId", "teamName");
     if (!player) {
       throw new ApiError(402, "Player with given id not found");
     }
@@ -48,6 +46,7 @@ const getPlayerById = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Error while fetching player with given id");
   }
 });
+
 const createPlayer = asyncHandler(async (req, res) => {
   try {
     const { name, team, role, credits, matchId, teamId } = req.body;
@@ -78,6 +77,7 @@ const createPlayer = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Error while creating Player");
   }
 });
+
 const updatePlayer = asyncHandler(async (req, res) => {
   try {
     const updatedPlayer = await Player.findByIdAndUpdate(
@@ -87,11 +87,9 @@ const updatePlayer = asyncHandler(async (req, res) => {
         new: true,
       }
     ).populate("matchId", "teamA teamB startTime");
-    // .populate("teamId", "teamName");
     if (!updatedPlayer) {
       throw new ApiError(500, "Player not found");
     }
-    // const savedUserTeam = await updatedUserTeam.save();
     res
       .status(200)
       .json(new ApiResponse(200, updatePlayer, "Player updated successfully"));
@@ -105,7 +103,6 @@ const deletePlayer = asyncHandler(async (req, res) => {
   try {
     const { id } = req.body;
     const removedPlayer = await Player.findByIdAndDelete(id);
-    // console.log("removed contest: ", removedContest);
 
     if (!removedPlayer) {
       throw new ApiError(400, "Removed player not found");

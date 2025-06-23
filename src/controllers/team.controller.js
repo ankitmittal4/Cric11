@@ -38,6 +38,7 @@ const getTeamById = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Error while fetching team with given id");
   }
 });
+
 const createTeam = asyncHandler(async (req, res) => {
   try {
     const { teamName, players } = req.body;
@@ -60,6 +61,7 @@ const createTeam = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Error while creating team");
   }
 });
+
 const updateTeam = asyncHandler(async (req, res) => {
   try {
     const updatedTeam = await Team.findByIdAndUpdate(req.body.id, req.body, {
@@ -68,7 +70,7 @@ const updateTeam = asyncHandler(async (req, res) => {
     if (!updatedTeam) {
       throw new ApiError(500, "Team not found");
     }
-    // const savedUserTeam = await updatedUserTeam.save();
+
     res
       .status(200)
       .json(new ApiResponse(200, updateTeam, "Team updated successfully"));
@@ -82,7 +84,6 @@ const deleteTeam = asyncHandler(async (req, res) => {
   try {
     const { id } = req.body;
     const removedTeam = await Team.findByIdAndDelete(id);
-    // console.log("removed contest: ", removedContest);
 
     if (!removedTeam) {
       throw new ApiError(400, "Removed team not found");

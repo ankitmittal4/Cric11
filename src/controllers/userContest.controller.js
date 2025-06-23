@@ -13,8 +13,6 @@ const createUserContest = async (req, res, next) => {
     const { _id } = req.user;
     const contest = await Contest.findById(req.body.contestId);
     const { contestId, players, captain, viceCaptain } = req.body;
-    // console.log("Players: ",players);
-    // console.log("Players: ",players); 
     const updatedPlayers = players.map((playerId) => ({
       id: playerId,
       //   points: 0,
@@ -76,7 +74,6 @@ const createUserContest = async (req, res, next) => {
 
 const updateTeam = asyncHandler(async (req, res) => {
   const { _id } = req.user;
-  //   const contest = await Contest.findById(req.body.contestId);
   const { id, players, captain, viceCaptain } = req.body;
   //   console.log("Response: ", req.body);
   const updatedPlayers = players.map((playerId) => ({
@@ -598,8 +595,6 @@ const getUserContestsById = asyncHandler(async (req, res) => {
 const updateUserContestsById = asyncHandler(async (req, res) => {
   try {
     const { id, opponentId } = req.body;
-    // console.log("Step1");
-    // console.log(opponentId);
     const userId = req.user.id;
     const userContest = await UserContest.aggregate([
       {
@@ -770,7 +765,6 @@ const updateUserContestsById = asyncHandler(async (req, res) => {
         },
       },
     ]);
-    // console.log(userContest[0]?.userId);
 
     const opponentContest = await UserContest.aggregate([
       {
@@ -941,51 +935,10 @@ const updateUserContestsById = asyncHandler(async (req, res) => {
     const fantasyMatchatchPointsEndPoint = "match_bbb";
     const fantasyMatchPointsApiUrl = `${process.env.API_URL}${fantasyMatchatchPointsEndPoint}?apikey=${process.env.API_KEY}&id=${matchId}`;
 
-    // const matchInfoApiEndpoint = "match_info";
-    // const matchInfoApiUrl = `${process.env.API_URL}${matchInfoApiEndpoint}?apikey=${process.env.API_KEY}&id=${matchId}`;
     try {
-      //   const matchInfo = await axios.get(matchInfoApiUrl);
-      //   const isMatchEnded = matchInfo.data.data.matchEnded;
-
-      //NOTE: Update Match status code
-      //-----------------------------------START---------------------------------------->
-      //   const matchId = userContest[0].matchDetails.matchId;
-      //   const data = await Match.findOneAndUpdate(
-      //     { matchId: matchId },
-      //     {
-      //       $set: {
-      //         matchStarted: true,
-      //         matchEnded: isMatchEnded,
-      //       },
-      //     },
-      //     { new: true }
-      //   );
-      //   console.log("Data: ", data);
-      //-----------------------------------ENDS---------------------------------------->
-
-      //NOTE: if match ended then show the details do not call the api again to calculate points
-      //   if (isMatchEnded && userContest[0].result != null) {
-      //     // console.log("Step 1");
-      //     return res.status(200).json(
-      //       new ApiResponse(
-      //         200,
-      //         {
-      //           updatedUserContest: userContest,
-      //           updatedOpponentContest: opponentContest,
-      //         },
-      //         "user contest with given id fetched successfully"
-      //       )
-      //     );
-      //   }
-
       const fantasyPoints = await axios.get(fantasyMatchPointsApiUrl);
-      // console.log("Step 2");
-      //   console.log(fantasyMatchPointsApiUrl);
-      //   console.log("++++++++", fantasyPoints.data.data.bbb);
       if (fantasyPoints.data.status === "success") {
-        // console.log("Step 4");
         const isMatchEnded = fantasyPoints?.data?.data?.matchEnded;
-        // console.log("Res: ", fantasyPoints?.data.data.matchEnded);
         const matchId = userContest[0].matchDetails.matchId;
         const data = await Match.findOneAndUpdate(
           { matchId: matchId },
@@ -997,7 +950,6 @@ const updateUserContestsById = asyncHandler(async (req, res) => {
           },
           { new: true }
         );
-        // console.log(data);
         if (isMatchEnded && userContest[0].result != null) {
           return res.status(200).json(
             new ApiResponse(
@@ -1011,13 +963,9 @@ const updateUserContestsById = asyncHandler(async (req, res) => {
           );
         }
 
-        //NOTE: matching both user11 and fantasy data to calculate match points
         const n = userContest[0]?.n || opponentContest[0]?.n;
         const bbb = fantasyPoints?.data?.data?.bbb; //it is an array
         const filterbbb = bbb.filter((ball) => ball.n > n);
-        // console.log("BBB: ", filterbbb);
-        // const filterbbb = bbb.slice(n);
-        // console.log("Step 9");
         const fantasyDataLookup = filterbbb.reduce((acc, ball) => {
           acc[ball?.batsman?.id] = acc[ball?.batsman?.id] || 0;
           acc[ball?.bowler?.id] = acc[ball?.bowler?.id] || 0;
@@ -1035,18 +983,12 @@ const updateUserContestsById = asyncHandler(async (req, res) => {
           }
           return acc;
         }, {});
-        // console.log(fantasyDataLookup);
-        // console.log("Step 0: ", bbb);
-        // console.log("Step 10");
         const updatedn = bbb[bbb.length - 1].n;
         const user11 = userContest[0].user11;
-        // console.log(user11);
         const opponent11 = opponentContest[0].user11;
 
         let totalPointsOfUser = userContest[0]?.points;
         let totalPointsOfOpponent = opponentContest[0]?.points;
-        // let totalPointsOfUser = userContest[0].points;
-        // let totalPointsOfOpponent = opponentContest[0].points;
         const updatedUserPlayers = user11.map((player) => {
           const playerId = player.id.toString();
           let points = fantasyDataLookup[playerId] || 0;
@@ -1074,17 +1016,14 @@ const updateUserContestsById = asyncHandler(async (req, res) => {
           }
           totalPointsOfOpponent += points;
           return {
-            // ...(player.toObject ? player.toObject() : player),
             id: player.id,
             points: points + player.points,
             // points: 0,
           };
         });
 
-        //update points and result in database
         let userResult;
         let opponentResult;
-        // console.log("IsmatchEnded: ", isMatchEnded);
         let winnerId;
         if (isMatchEnded) {
           if (totalPointsOfUser > totalPointsOfOpponent) {
@@ -1104,20 +1043,6 @@ const updateUserContestsById = asyncHandler(async (req, res) => {
             message: "Contest Winning",
           });
         }
-
-        // if (isMatchEnded) {
-        //   if (userResult === "win") {
-        //     winnerId = id;
-        //   } else {
-        //     winnerId = opponentId;
-        //   }
-        //   const transaction = await Transaction.create({
-        //     userId: winnerId,
-        //     amount: contest.,
-        //     transactionType: "Deposit",
-        //     transactionStatus: "Success",
-        //   });
-        // }
 
         await UserContest.bulkWrite([
           {
@@ -1313,7 +1238,6 @@ const updateUserContestsById = asyncHandler(async (req, res) => {
             },
           },
         ]);
-        // console.log(updatedUserContest);
 
         const updatedOpponentContest = await UserContest.aggregate([
           {
@@ -1472,8 +1396,6 @@ const updateUserContestsById = asyncHandler(async (req, res) => {
             },
           },
         ]);
-        // console.log("userContest: ", updatedUserContest);
-        // console.log("opponentContest: ", updatedOpponentContest);
         if (
           !updatedUserContest ||
           updatedUserContest.length === 0 ||

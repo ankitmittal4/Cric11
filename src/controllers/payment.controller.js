@@ -85,6 +85,7 @@ const verifyPayment = asyncHandler(async (req, res) => {
         // res.status(500).json({ success: false, message: "Payment verification failed" });
     }
 });
+
 const failedPayment = asyncHandler(async (req, res) => {
     try {
         const { _id } = req.user;

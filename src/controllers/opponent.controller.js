@@ -11,7 +11,6 @@ const createOpponent = asyncHandler(async (req, res) => {
   try {
     let opponent = await Opponent.findOne({ contestId });
     let userContest = await UserContest.findOne({ _id: userContestId });
-    // console.log("++++ ", userContest.userId);
     if (opponent) {
       let added = false;
       const userId = userContest.userId;
@@ -21,7 +20,6 @@ const createOpponent = asyncHandler(async (req, res) => {
           const opponentContest = await UserContest.findOne({
             _id: pair[0].toString(),
           });
-          // console.log("++++++", opponentContest);
           const opponentUserId = opponentContest.userId;
 
           if (userId.toString() != opponentUserId.toString()) {
@@ -62,7 +60,6 @@ const createOpponent = asyncHandler(async (req, res) => {
 });
 const getOpponent = asyncHandler(async (req, res) => {
   const { contestId, userContestId } = req.body;
-  //   console.log("In get opponent: ", req.body);
 
   try {
     const opponent = await Opponent.aggregate([
@@ -102,7 +99,6 @@ const getOpponent = asyncHandler(async (req, res) => {
         },
       },
     ]);
-    // console.log("Opponent: ", opponent);
 
     if (!opponent[0].opponent) {
       return res

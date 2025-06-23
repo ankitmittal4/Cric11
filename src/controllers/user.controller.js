@@ -57,12 +57,10 @@ const loginUser = asyncHandler(async (req, res) => {
     throw new ApiError(400, "No username or email");
   }
 
-  //check user in db
   const user = await User.findOne({ $or: [{ username }, { email }] });
   if (!user) {
     throw new ApiError(400, "User with this username or email not exists");
   }
-  //check password correct
   const isPasswordValid = await user.isPasswordCorrect(password);
   if (!isPasswordValid) {
     throw new ApiError(400, "Incorrect password");
@@ -124,18 +122,15 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
     throw new ApiError(401, "No refresh token found");
   }
 
-  //validate token
   try {
     const decodedToken = jwt.verify(
       incomingToken,
       process.env.REFRESH_TOKEN_SECRET
     );
-    //find user using this token
     const user = await User.findById(decodedToken?._id);
     if (!user) {
       throw new ApiError(401, "Invalid refresh token");
     }
-    //check both refresh token
     if (incomingToken !== user?.refreshToken) {
       throw new ApiError(400, "Refresh token expired or used");
     }
