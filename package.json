@@ -27,6 +27,7 @@
     "date-fns-tz": "^3.2.0",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
+    "ioredis": "^5.6.1",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.5.0",
     "mongoose-aggregate-paginate-v2": "^1.1.1",

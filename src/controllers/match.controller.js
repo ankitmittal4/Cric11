@@ -4,6 +4,7 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { Match } from "../models/match.model.js";
 import jwt from "jsonwebtoken";
 import axios from "axios";
+import { client } from "../redis/client.js";
 
 const upcomingMatches = asyncHandler(async (req, res) => {
   try {
@@ -58,7 +59,15 @@ const upcomingMatches = asyncHandler(async (req, res) => {
 
 const getAllMatches = asyncHandler(async (req, res) => {
   try {
+    // const cachedMatches = await client.get("allMatches");
+    // if (cachedMatches) {
+    //   const parsedData = JSON.parse(cachedMatches);
+    //   return res
+    //     .status(200)
+    //     .json(new ApiResponse(200, parsedData, "All matches fetched successfully"));
+    // }
     const matches = await Match.find();
+    // client.set("allMatches", JSON.stringify(matches), "EX", 600);
     res
       .status(200)
       .json(new ApiResponse(200, matches, "All matches fetched successfully"));
