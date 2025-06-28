@@ -47,6 +47,7 @@ const getEmailTemplate = (type, data) => {
                  <p>Best regards,</p>
                  <p><strong>Cric11 Team</strong></p>`,
             };
+        case "payment-withdraw-success":
 
         default:
             return {
