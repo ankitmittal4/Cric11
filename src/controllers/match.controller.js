@@ -4,7 +4,7 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { Match } from "../models/match.model.js";
 import jwt from "jsonwebtoken";
 import axios from "axios";
-import { client } from "../redis/client.js";
+// import { client } from "../redis/client.js";
 
 const upcomingMatches = asyncHandler(async (req, res) => {
   try {

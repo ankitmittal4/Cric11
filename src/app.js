@@ -29,6 +29,7 @@ import TransactionRouter from "./routes/transaction.routes.js";
 import payment from "./routes/payment.routes.js";
 import adminRouter from "./routes/admin.routes.js";
 import emailRouter from "./routes/email.routes.js";
+import withdrawMoneyRouter from "./routes/withdrawMoney.routes.js";
 
 
 //routes declaration
@@ -42,6 +43,7 @@ app.use("/api/v1/user-contest", userContestRouter);
 app.use("/api/v1/opponent", OpponentRouter);
 app.use("/api/v1/transactions", TransactionRouter);
 app.use('/api/v1/payment', payment)
+app.use('/api/v1/withdraw', withdrawMoneyRouter)
 app.use('/api/v1/email', emailRouter)
 
 app.get("/", (req, res) => {
