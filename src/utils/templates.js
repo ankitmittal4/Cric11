@@ -18,7 +18,7 @@ const getEmailTemplate = (type, data) => {
                 html: `<h2>Hello ${data.name},</h2>
                  <p>Thank you for your payment.</p>
                  <p><strong>Amount:</strong> ₹${data.amount}</p>
-                 <p>Your transaction ID: ${data.transactionId}</p>
+                 <p>Transaction ID: ${data.transactionId}</p>
                  <p>Your transaction was successful. If you have any questions, feel free to contact our support team.</p>
                  <br/>
                  <p>Best regards,</p>
@@ -51,14 +51,14 @@ const getEmailTemplate = (type, data) => {
             return {
                 subject: "Payment Withdrawl Successful",
                 html: `<h2>Hello ${data.name},</h2>
-                            <p>Your withdrawl is successfull.</p>
-                            <p>Thank you for your payment.</p>
-                            <p><strong>Amount:</strong> ₹${data.amount}</p>
-                            <p>Transaction ID: ${data.transactionId}</p>
-                            <p>Your transaction was successful. If you have any questions, feel free to contact our support team.</p>
-                            <br/>
-                            <p>Best regards,</p>
-                            <p><strong>Cric11 Team</strong></p>`
+                    <p>Your withdrawl is successfull.</p>
+                    <p>Thank you for your payment.</p>
+                    <p><strong>Amount:</strong> ₹${data.amount}</p>
+                    <p>Transaction ID: ${data.transactionId}</p>
+                    <p>Your transaction was successful. If you have any questions, feel free to contact our support team.</p>
+                    <br/>
+                    <p>Best regards,</p>
+                    <p><strong>Cric11 Team</strong></p>`
             };
         default:
             return {
