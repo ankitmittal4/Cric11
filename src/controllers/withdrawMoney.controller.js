@@ -8,16 +8,21 @@ const withdraw = asyncHandler(async (req, res) => {
     const { amount } = req.body;
     const userId = req.user._id;
 
-    if (!amount || amount <= 0) {
-        throw new ApiError(400, "Invalid withdrawal amount");
-        return
-    }
-
     const user = await User.findById(userId);
     if (!user) {
         throw new ApiError(400, "User not found");
         return
     }
+
+    if (!amount || amount <= 0) {
+        throw new ApiError(400, "Invalid withdrawal amount");
+        return
+    }
+    if (amount > user?.walletBalance) {
+        throw new ApiError(400, "Withdrawal amount is greater than wallet balance");
+        return
+    }
+
 
     if (user.walletBalance < amount) {
         throw new ApiError(400, "Insufficient wallet balance");
