@@ -46,10 +46,10 @@ const sendPaymentFailedEmail = async (req, res) => {
 };
 
 const sendPaymentWithdrawSuccessEmail = async (req, res) => {
-    const { email, name, amount, transactionId } = req.body;
+    const { email, name, amount, transactionId, upiId } = req.body;
 
     try {
-        await sendEmail(email, "payment-withdraw-success", { name, amount, transactionId });
+        await sendEmail(email, "payment-withdraw-success", { name, amount, transactionId, upiId });
         res.status(200).json({ message: "Payment success email sent successfully" });
     } catch (err) {
         res.status(500).json({ error: "Failed to send payment success email" });

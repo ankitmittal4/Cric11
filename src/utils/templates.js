@@ -55,6 +55,7 @@ const getEmailTemplate = (type, data) => {
                     <p>Thank you for your payment.</p>
                     <p><strong>Amount:</strong> ₹${data.amount}</p>
                     <p>Transaction ID: ${data.transactionId}</p>
+                    <p>UPI ID: ${data.upiId}</p>
                     <p>Your transaction was successful. If you have any questions, feel free to contact our support team.</p>
                     <br/>
                     <p>Best regards,</p>
