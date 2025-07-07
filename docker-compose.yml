@@ -1,0 +1,20 @@
+version: "3.1"
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: cric11-backend-image
+    container_name: cric11-backend-container
+    ports:      
+      - "4000:8000"
+    env_file:
+      - .env
+
+    volumes: 
+      - .:/usr/src/cric11-backend
+      
+
+
+
+    
