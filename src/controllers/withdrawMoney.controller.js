@@ -95,7 +95,7 @@ const withdraw = asyncHandler(async (req, res) => {
             .json(
                 new ApiResponse(
                     200,
-                    { payout, walletBalance: user.walletBalance },
+                    { payout, walletBalance: user.walletBalance, transactionId: withdrawRequest._id },
                     "Withdrawal successfully in test mode"
                 )
             );
