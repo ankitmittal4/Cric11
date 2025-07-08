@@ -1437,12 +1437,14 @@ const deleteUserContestsById = asyncHandler(async (req, res) => {
     const { id } = req.body;
     const userId = req.user._id;
 
+    //Find user contest and delete it
     const userContest = await UserContest.findByIdAndDelete(id);
     if (!userContest) {
       return res.status(404).json(new ApiError(404, "User contest not found"));
     }
-    // console.log(userContest.contestId);
+
     const { contestId } = userContest;
+    //Find contest and fetch entryFee
     const contest = await Contest.aggregate([
       {
         $match: { _id: new mongoose.Types.ObjectId(contestId) }
@@ -1455,6 +1457,7 @@ const deleteUserContestsById = asyncHandler(async (req, res) => {
     ])
     const entryFee = contest[0]?.entryFee;
 
+    //Find user and update wallet balance to add entryFee
     const user = await User.findById(userId);
     if (!user) {
       return res.status(404).json(new ApiError(404, "User not found"));
@@ -1467,6 +1470,17 @@ const deleteUserContestsById = asyncHandler(async (req, res) => {
       { new: true }
     );
 
+
+    //Create transaction for refund
+    await Transaction.create({
+      userId: userId,
+      amount: entryFee,
+      transactionType: "refund",
+      transactionStatus: "success",
+      message: "Contest Entry Fee Refund",
+    })
+
+    // Return success response
     res
       .status(200)
       .json(new ApiResponse(200, null, "User contest deleted successfully"));
