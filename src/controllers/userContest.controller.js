@@ -1431,10 +1431,25 @@ const updateUserContestsById = asyncHandler(async (req, res) => {
   }
 });
 
+const deleteUserContestsById = asyncHandler(async (req, res) => {
+  try {
+    const { id } = req.body;
+    const userContest = await UserContest.findByIdAndDelete(id);
+    res
+      .status(200)
+      .json(new ApiResponse(200, userContest, "User contest deleted successfully"));
+  }
+  catch (error) {
+    console.log("error: ", error);
+    throw new ApiError(500, "Error while deleting user contest with given id");
+  }
+});
+
 export {
   createUserContest,
   getAllUserContests,
   getUserContestsById,
   updateUserContestsById,
   updateTeam,
+  deleteUserContestsById
 };
