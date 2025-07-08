@@ -8,6 +8,7 @@ import { User } from "../models/user.model.js";
 import mongoose, { Mongoose } from "mongoose";
 import axios from "axios";
 import { Match } from "../models/match.model.js";
+
 const createUserContest = async (req, res, next) => {
   try {
     const { _id } = req.user;
@@ -1433,13 +1434,42 @@ const updateUserContestsById = asyncHandler(async (req, res) => {
 
 const deleteUserContestsById = asyncHandler(async (req, res) => {
   try {
-    console.log("req.user: ", req);
     const { id } = req.body;
-    const userId = req.user.id;
+    const userId = req.user._id;
+
     const userContest = await UserContest.findByIdAndDelete(id);
+    if (!userContest) {
+      return res.status(404).json(new ApiError(404, "User contest not found"));
+    }
+    // console.log(userContest.contestId);
+    const { contestId } = userContest;
+    const contest = await Contest.aggregate([
+      {
+        $match: { _id: new mongoose.Types.ObjectId(contestId) }
+      },
+      {
+        $project: {
+          entryFee: 1,
+        }
+      }
+    ])
+    const entryFee = contest[0]?.entryFee;
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json(new ApiError(404, "User not found"));
+    }
+    const { walletBalance } = user;
+    const updateBalance = walletBalance + entryFee;
+    await User.findByIdAndUpdate(
+      userId,
+      { walletBalance: updateBalance },
+      { new: true }
+    );
+
     res
       .status(200)
-      .json(new ApiResponse(200, userContest, "User contest deleted successfully"));
+      .json(new ApiResponse(200, null, "User contest deleted successfully"));
   }
   catch (error) {
     console.log("error: ", error);
