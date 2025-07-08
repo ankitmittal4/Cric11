@@ -1,5 +1,5 @@
 import { sendEmail } from "../utils/mailer.js";
-
+import { User } from "../models/user.model.js";
 
 const sendLoginEmail = async (req, res) => {
     const { email, name, time } = req.body;
@@ -55,6 +55,7 @@ const sendPaymentWithdrawSuccessEmail = async (req, res) => {
         res.status(500).json({ error: "Failed to send payment success email" });
     }
 }
+
 const sendContactUsSuccessEmail = async (req, res) => {
     const { email, name, message } = req.body;
     const adminMail = process.env.ADMIN_EMAIL;
@@ -67,9 +68,9 @@ const sendContactUsSuccessEmail = async (req, res) => {
     }
 }
 
-const sendOtpEmail = async (req, res) => {
+const sendLoginOtpEmail = async (req, res) => {
     const { email, password } = req.body;
-
+    console.log(req.body);
     const user = await User.findOne({ email });
     if (!user) return res.status(404).json({ message: 'User not found' });
 
@@ -84,22 +85,17 @@ const sendOtpEmail = async (req, res) => {
 
     // Send OTP via email
     try {
-        await sendEmail(email, "send-otp", { otp });
-        res.status(200).json({ message: "OTP email sent successfully" });
+        await sendEmail(email, "login-otp", { otp });
+        res.status(200).json({ message: "Login OTP email sent successfully" });
     } catch (err) {
-        res.status(500).json({ error: "Failed to send OTP" });
+        console.log(err);
+        res.status(500).json({ error: "Failed to send Login OTP" });
     }
-
-    await transporter.sendMail({
-        to: email,
-        subject: 'Your OTP for Login - Cric11',
-        html: `<p>Your OTP is: <b>${otp}</b>. It expires in 5 minutes.</p>`,
-    });
 
 }
 
 
-export { sendLoginEmail, sendContestWinEmail, sendPaymentSuccessEmail, sendPaymentFailedEmail, sendPaymentWithdrawSuccessEmail, sendContactUsSuccessEmail };
+export { sendLoginEmail, sendContestWinEmail, sendPaymentSuccessEmail, sendPaymentFailedEmail, sendPaymentWithdrawSuccessEmail, sendContactUsSuccessEmail, sendLoginOtpEmail };
 
 
 
