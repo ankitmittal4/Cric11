@@ -58,6 +58,9 @@ userSchema.pre("save", async function (next) {
   if (!this.isModified("otp")) {
     return next();
   }
+  if (!this.otp) {
+    next();
+  }
   this.otp = await bcrypt.hash(this.otp, 10);
   next();
 });
