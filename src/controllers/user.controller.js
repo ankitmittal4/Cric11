@@ -110,7 +110,8 @@ const verifyOtpAndLoginUser = asyncHandler(async (req, res) => {
     throw new ApiError(400, "OTP expired");
   }
 
-  if (user.otp !== otp) {
+  const isOtpValid = await user.isOtpCorrect(otp);
+  if (!isOtpValid) {
     throw new ApiError(400, "Invalid OTP");
   }
 
