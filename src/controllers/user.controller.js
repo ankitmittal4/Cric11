@@ -69,7 +69,42 @@ const sendLoginOtp = asyncHandler(async (req, res) => {
   //At this point: password is valid and now send otp
 
   const otp = Math.floor(1000 + Math.random() * 9000).toString(); // Generate a 4-digit OTP
-  const otpExpiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes
+  const otpExpiresAt = new Date(Date.now() + 2 * 60 * 1000); // 5 minutes
+
+  user.otp = otp;
+  user.otpExpiresAt = otpExpiresAt;
+  await user.save();
+
+  // Send OTP via email
+  try {
+    await sendEmail(email, "login-otp", { otp });
+    return res
+      .status(200)
+      .json(
+        new ApiResponse(
+          200,
+          { message: "Login OTP email sent successfully" },
+          "Login OTP email sent successfully"
+        )
+      );
+  } catch (err) {
+    console.log(err);
+    throw new ApiError(400, "Failed to send Login OTP");
+  }
+
+});
+const reSendLoginOtp = asyncHandler(async (req, res) => {
+  const { email } = req.body;
+  if (!email) {
+    throw new ApiError(400, "No email");
+  }
+
+  const user = await User.findOne({ email });
+  if (!user) {
+    throw new ApiError(400, "User with this email not exists");
+  }
+  const otp = Math.floor(1000 + Math.random() * 9000).toString(); // Generate a 4-digit OTP
+  const otpExpiresAt = new Date(Date.now() + 2 * 60 * 1000); // 5 minutes
 
   user.otp = otp;
   user.otpExpiresAt = otpExpiresAt;
@@ -240,6 +275,7 @@ const getUserWalletBalance = asyncHandler(async (req, res) => {
 export {
   registerUser,
   sendLoginOtp,
+  reSendLoginOtp,
   logoutUser,
   refreshAccessToken,
   getUserWalletBalance,
