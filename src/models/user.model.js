@@ -30,6 +30,12 @@ const userSchema = new Schema(
       type: String,
       required: [true, "Password is required"],
     },
+    otp: {
+      type: String,
+    },
+    otpExpiresAt: {
+      type: Date
+    },
     refreshToken: {
       type: String,
     },
