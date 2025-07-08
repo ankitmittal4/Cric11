@@ -68,34 +68,7 @@ const sendContactUsSuccessEmail = async (req, res) => {
     }
 }
 
-const sendLoginOtpEmail = async (req, res) => {
-    const { email, password } = req.body;
-    console.log(req.body);
-    const user = await User.findOne({ email });
-    if (!user) return res.status(404).json({ message: 'User not found' });
-
-    // Optionally: validate password here
-
-    const otp = Math.floor(100000 + Math.random() * 900000).toString(); // Generate a 6-digit OTP
-    const otpExpiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes
-
-    user.otp = otp;
-    user.otpExpiresAt = otpExpiresAt;
-    await user.save();
-
-    // Send OTP via email
-    try {
-        await sendEmail(email, "login-otp", { otp });
-        res.status(200).json({ message: "Login OTP email sent successfully" });
-    } catch (err) {
-        console.log(err);
-        res.status(500).json({ error: "Failed to send Login OTP" });
-    }
-
-}
-
-
-export { sendLoginEmail, sendContestWinEmail, sendPaymentSuccessEmail, sendPaymentFailedEmail, sendPaymentWithdrawSuccessEmail, sendContactUsSuccessEmail, sendLoginOtpEmail };
+export { sendLoginEmail, sendContestWinEmail, sendPaymentSuccessEmail, sendPaymentFailedEmail, sendPaymentWithdrawSuccessEmail, sendContactUsSuccessEmail };
 
 
 
