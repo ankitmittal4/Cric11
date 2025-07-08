@@ -14,7 +14,7 @@ const getEmailTemplate = (type, data) => {
         case "login-otp":
             return {
                 subject: "Your OTP for Login - Cric11",
-                html: `<h2>Your OTP is <b>${data.otp}</b> <br/><br/>It expires in 5 minutes.</h2>
+                html: `<h2>Your OTP is <b>${data.otp}</b> <br/><br/>It expires in 2 minutes.</h2>
                  <br/>
                  <p>Best regards,</p>
                  <p><strong>Cric11 Team</strong></p>`,
