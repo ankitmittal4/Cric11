@@ -1433,7 +1433,9 @@ const updateUserContestsById = asyncHandler(async (req, res) => {
 
 const deleteUserContestsById = asyncHandler(async (req, res) => {
   try {
+    console.log("req.user: ", req);
     const { id } = req.body;
+    const userId = req.user.id;
     const userContest = await UserContest.findByIdAndDelete(id);
     res
       .status(200)
