@@ -3,6 +3,7 @@ import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { User } from "../models/user.model.js";
 import jwt from "jsonwebtoken";
+import { th } from "date-fns/locale";
 
 const generateAccessAndRefreshToken = async (userId) => {
   try {
@@ -182,10 +183,46 @@ const getUserWalletBalance = asyncHandler(async (req, res) => {
   }
 });
 
+const verifyLoginOtp = asyncHandler(async (req, res) => {
+  const { email, otp } = req.body;
+
+  if (!email || !otp) {
+    throw new ApiError(400, "Email and OTP are required");
+  }
+
+  const user = await User.findOne({ email });
+  if (!user) {
+    throw new ApiError(404, "User not found");
+  }
+
+  if (new Date() > user.otpExpiresAt) {
+    throw new ApiError(400, "OTP expired");
+  }
+
+  if (user.otp !== otp) {
+    throw new ApiError(400, "Invalid OTP");
+  }
+
+  user.otp = null;
+  user.otpExpiresAt = null;
+  await user.save();
+
+  res
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        { userId: user._id },
+        "OTP verified successfully"
+      )
+    );
+
+})
 export {
   registerUser,
   loginUser,
   logoutUser,
   refreshAccessToken,
   getUserWalletBalance,
+  verifyLoginOtp
 };
