@@ -67,6 +67,38 @@ const sendContactUsSuccessEmail = async (req, res) => {
     }
 }
 
+const sendOtpEmail = async (req, res) => {
+    const { email, password } = req.body;
+
+    const user = await User.findOne({ email });
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    // Optionally: validate password here
+
+    const otp = Math.floor(100000 + Math.random() * 900000).toString(); // Generate a 6-digit OTP
+    const otpExpiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes
+
+    user.otp = otp;
+    user.otpExpiresAt = otpExpiresAt;
+    await user.save();
+
+    // Send OTP via email
+    try {
+        await sendEmail(email, "send-otp", { otp });
+        res.status(200).json({ message: "OTP email sent successfully" });
+    } catch (err) {
+        res.status(500).json({ error: "Failed to send OTP" });
+    }
+
+    await transporter.sendMail({
+        to: email,
+        subject: 'Your OTP for Login - Cric11',
+        html: `<p>Your OTP is: <b>${otp}</b>. It expires in 5 minutes.</p>`,
+    });
+
+}
+
+
 export { sendLoginEmail, sendContestWinEmail, sendPaymentSuccessEmail, sendPaymentFailedEmail, sendPaymentWithdrawSuccessEmail, sendContactUsSuccessEmail };
 
 
