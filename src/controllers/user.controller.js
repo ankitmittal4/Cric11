@@ -93,6 +93,7 @@ const sendLoginOtp = asyncHandler(async (req, res) => {
   }
 
 });
+
 const reSendLoginOtp = asyncHandler(async (req, res) => {
   const { email } = req.body;
   if (!email) {
@@ -118,13 +119,13 @@ const reSendLoginOtp = asyncHandler(async (req, res) => {
       .json(
         new ApiResponse(
           200,
-          { message: "Login OTP email sent successfully" },
-          "Login OTP email sent successfully"
+          { message: "Login OTP email re-sent successfully" },
+          "Login OTP email re-sent successfully"
         )
       );
   } catch (err) {
     console.log(err);
-    throw new ApiError(400, "Failed to send Login OTP");
+    throw new ApiError(400, "Failed to re-send Login OTP");
   }
 
 });
@@ -142,6 +143,9 @@ const verifyOtpAndLoginUser = asyncHandler(async (req, res) => {
   }
 
   if (new Date() > user.otpExpiresAt) {
+    user.otp = null;
+    user.otpExpiresAt = null;
+    await user.save();
     throw new ApiError(400, "OTP has expired");
   }
 
