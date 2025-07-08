@@ -50,10 +50,21 @@ userSchema.pre("save", async function (next) {
   this.password = await bcrypt.hash(this.password, 10);
   next();
 });
-
 userSchema.methods.isPasswordCorrect = async function (password) {
   return await bcrypt.compare(password, this.password);
 };
+
+userSchema.pre("save", async function (next) {
+  if (!this.isModified("otp")) {
+    return next();
+  }
+  this.otp = await bcrypt.hash(this.otp, 10);
+  next();
+});
+userSchema.methods.isOtpCorrect = async function (otp) {
+  return await bcrypt.compare(otp, this.otp);
+};
+
 
 userSchema.methods.generateAccessToken = function () {
   return jwt.sign(
