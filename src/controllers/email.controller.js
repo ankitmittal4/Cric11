@@ -55,8 +55,19 @@ const sendPaymentWithdrawSuccessEmail = async (req, res) => {
         res.status(500).json({ error: "Failed to send payment success email" });
     }
 }
+const sendContactUsSuccessEmail = async (req, res) => {
+    const { email, name, message } = req.body;
+    const adminMail = process.env.ADMIN_EMAIL;
 
-export { sendLoginEmail, sendContestWinEmail, sendPaymentSuccessEmail, sendPaymentFailedEmail, sendPaymentWithdrawSuccessEmail };
+    try {
+        await sendEmail(adminMail, "contact-us", { email, name, message });
+        res.status(200).json({ message: "Contact Us email sent successfully" });
+    } catch (err) {
+        res.status(500).json({ error: "Failed to send conatct us email" });
+    }
+}
+
+export { sendLoginEmail, sendContestWinEmail, sendPaymentSuccessEmail, sendPaymentFailedEmail, sendPaymentWithdrawSuccessEmail, sendContactUsSuccessEmail };
 
 
 

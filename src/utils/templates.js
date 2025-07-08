@@ -64,7 +64,7 @@ const getEmailTemplate = (type, data) => {
         case "contact-us":
             return {
                 subject: "Contact Us Message Received",
-                html: `<h2>Hello Admin,</h2>
+                html: `<h2>Hello Cric11 Admin,</h2>
                   <p>You have received a new message from the <strong>Contact Us</strong> form.</p>
               
                   <p><strong>Name:</strong> ${data.name}</p>
@@ -75,7 +75,7 @@ const getEmailTemplate = (type, data) => {
                   <p>Please respond to this message as soon as possible.</p>
                   <br/>
                   <p>Best regards,</p>
-                  <p><strong>Cric11 Website</strong></p>`
+                  <p><strong>Cric11 Web Application</strong></p>`
             };
 
         default:
