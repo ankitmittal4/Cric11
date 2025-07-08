@@ -20,7 +20,7 @@ const transactionSchema = new Schema(
     },
     transactionType: {
       type: String,
-      enum: ["debit", "credit", "nothing"],
+      enum: ["debit", "credit", "nothing", "refund"],
       required: true,
     },
     transactionStatus: {
