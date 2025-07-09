@@ -937,20 +937,31 @@ const updateUserContestsById = asyncHandler(async (req, res) => {
     const fantasyMatchPointsApiUrl = `${process.env.API_URL}${fantasyMatchatchPointsEndPoint}?apikey=${process.env.API_KEY}&id=${matchId}`;
 
     try {
+      const data = await Match.findOneAndUpdate(
+        { matchId: matchId },
+        {
+          $set: {
+            matchStarted: true,
+          },
+        },
+        { new: true }
+      );
       const fantasyPoints = await axios.get(fantasyMatchPointsApiUrl);
       if (fantasyPoints.data.status === "success") {
         const isMatchEnded = fantasyPoints?.data?.data?.matchEnded;
         const matchId = userContest[0].matchDetails.matchId;
-        const data = await Match.findOneAndUpdate(
-          { matchId: matchId },
-          {
-            $set: {
-              matchStarted: true,
-              matchEnded: isMatchEnded,
+        if (isMatchEnded) {
+          const data = await Match.findOneAndUpdate(
+            { matchId: matchId },
+            {
+              $set: {
+                // matchStarted: true,
+                matchEnded: isMatchEnded,
+              },
             },
-          },
-          { new: true }
-        );
+            { new: true }
+          );
+        }
         if (isMatchEnded && userContest[0].result != null) {
           return res.status(200).json(
             new ApiResponse(
