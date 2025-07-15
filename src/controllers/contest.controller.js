@@ -159,178 +159,179 @@ const getContestById = asyncHandler(async (req, res) => {
 });
 
 const createContest = asyncHandler(async (req, res) => {
-  try {
-    const {
-      matchId,
-      entryFee,
-      prizePool,
-      maxParticipants,
-      t1,
-      t2,
-      t1img,
-      t2img,
-      series,
-    } = req.body;
-    // console.log(series);
-    if (
-      [matchId, entryFee, prizePool, maxParticipants].some(
-        (field) => field?.trim() === ""
-      )
-    ) {
-      throw new ApiError(400, "All fields are required");
-    }
-    const isMatchPresent = await Match.findOne({ matchId });
-    const matchSquad = await Player.findOne({ matchId });
-    // console.log("isMatchPresent: ", isMatchPresent);
-    if (isMatchPresent) {
-      const contest = await Contest.create({
-        matchId,
-        entryFee,
-        prizePool,
-        maxParticipants,
-        matchRef: isMatchPresent._id,
-        squadRef: matchSquad._id,
-      });
+  const {
+    matchId,
+    entryFee,
+    prizePool,
+    maxParticipants,
+    t1,
+    t2,
+    t1img,
+    t2img,
+    series,
+  } = req.body;
 
-      if (!contest) {
-        throw new ApiError(
-          500,
-          "Something went wrong while creating a contest"
-        );
-      }
-
-      return res
-        .status(201)
-        .json(new ApiResponse(200, contest, "Contest created successfully"));
-    }
-
-    //api call for matchInfo
-    const matchInfoApiEndpoint = "match_info";
-    const matchInfoApiUrl = `${process.env.API_URL}${matchInfoApiEndpoint}?apikey=${process.env.API_KEY}&id=${matchId}`;
-    let matchInfo;
-    try {
-      matchInfo = await axios.get(matchInfoApiUrl);
-      if (matchInfo?.data.status === "failure") {
-        console.log("Error in match info api: ", matchInfo?.data.reason);
-        throw new ApiError(400, matchInfo?.data.reason);
-      }
-    } catch (error) {
-      console.log("Error while getting match info: ", error);
-      throw new ApiError(400, error);
-    }
-    // console.log("Step 2: ", matchInfo);
-
-    //   console.log("matchInfo::: ", matchInfo);
-    const {
-      name,
-      matchType,
-      venue,
-      teams,
-      dateTimeGMT,
-      matchEnded,
-      matchStarted,
-    } = matchInfo?.data?.data;
-    const teamA = t1.split(" [")[0];
-    const teamAAcronym = t1.match(/\[(.*?)\]/)?.[1];
-    const teamB = t2.split(" [")[0];
-    const teamBAcronym = t2.match(/\[(.*?)\]/)?.[1];
-
-    const teamAImg = matchInfo?.data?.data?.teamInfo?.[0]?.img || t1img;
-    const teamBImg = matchInfo?.data?.data?.teamInfo?.[1]?.img || t2img;
-
-    //convert time
-    const matchTimeGMT = dateTimeGMT;
-    const matchDateGMT = new Date(matchTimeGMT + "Z");
-    const istMatchDate = toZonedTime(matchDateGMT, "Asia/Kolkata");
-    const formattedIstMatchDate = format(istMatchDate, "yyyy-MM-dd", {
-      timeZone: "Asia/Kolkata",
-    });
-    const formattedIstMatchTime = format(istMatchDate, "HH:mm", {
-      timeZone: "Asia/Kolkata",
-    });
-    const date = formattedIstMatchDate;
-    const startTime = formattedIstMatchTime;
-    if (
-      [matchId, name, matchType, teamA, teamB, startTime, date, venue].some(
-        (field) => field?.trim() === ""
-      )
-    ) {
-      throw new ApiError(400, "All fields are required");
-    }
-    const match = await Match.create({
-      matchId,
-      matchType,
-      name,
-      teamA,
-      teamB,
-      teamAAcronym,
-      teamBAcronym,
-      teamAImg,
-      teamBImg,
-      series,
-      date,
-      startTime,
-      venue,
-      matchEnded,
-      matchStarted,
-    });
-    if (!match) {
-      throw new ApiError(500, "Something went wrong while creating a match");
-    }
-
-    //FIXME: players database call
-    const matchSquadApiEndpoint = "match_squad";
-    const matchSquadApiUrl = `${process.env.API_URL}${matchSquadApiEndpoint}?apikey=${process.env.API_KEY}&id=${matchId}`;
-
-    let matchSquadInfo;
-    try {
-      matchSquadInfo = await axios.get(matchSquadApiUrl);
-      //   console.log("Match Squad");
-      if (matchSquadInfo?.data.status === "failure") {
-        console.log("Error in match info api: ", matchSquadInfo?.data.reason);
-        throw new ApiError(400, matchSquadInfo?.data.reason);
-      }
-    } catch (error) {
-      console.log("Error while fetching match squad");
-      throw new ApiError(400, error);
-    }
-    //   console.log("matchInfo::: ", matchInfo.data.data);
-    const { data } = matchSquadInfo.data;
-
-    // if ([teamName, players].some((field) => field?.trim() === "")) {
-    //   throw new ApiError(400, "All fields are required");
-    // }
-
-    const match_squad = await Player.create({
-      matchId,
-      squad: data,
-    });
-    if (!match_squad) {
-      throw new ApiError(500, "Something went wrong while creating a squad");
-    }
-    //FIXME: squad/player controller done
-
-    const matchRef = match._id;
-    const squadRef = match_squad._id;
+  if (
+    [matchId, entryFee, prizePool, maxParticipants].some(
+      (field) => field?.trim() === ""
+    )
+  ) {
+    throw new ApiError(400, "All fields are required");
+  }
+  const isMatchPresent = await Match.findOne({ matchId });
+  const matchSquad = await Player.findOne({ matchId });
+  // console.log("isMatchPresent: ", isMatchPresent);
+  if (isMatchPresent) {
     const contest = await Contest.create({
       matchId,
       entryFee,
       prizePool,
       maxParticipants,
-      matchRef,
-      squadRef,
+      matchRef: isMatchPresent._id,
+      squadRef: matchSquad._id,
     });
 
     if (!contest) {
-      throw new ApiError(500, "Something went wrong while creating a contest");
+      throw new ApiError(
+        500,
+        "Something went wrong while creating a contest"
+      );
     }
 
     return res
       .status(201)
       .json(new ApiResponse(200, contest, "Contest created successfully"));
-  } catch (error) {
-    console.log("Error in Create contest", error);
   }
+
+  //api call for matchInfo
+  const matchInfoApiEndpoint = "match_info";
+  const matchInfoApiUrl = `${process.env.API_URL}${matchInfoApiEndpoint}?apikey=${process.env.API_KEY}&id=${matchId}`;
+  let matchInfo;
+  try {
+    matchInfo = await axios.get(matchInfoApiUrl);
+    if (matchInfo?.data.status === "failure") {
+      console.log("Error in match info api: ", matchInfo?.data.reason);
+      throw new ApiError(400, matchInfo?.data.reason);
+    }
+  } catch (error) {
+    console.log("Error while getting match info: ", error);
+    throw new ApiError(400, error);
+  }
+  // console.log("Step 2: ", matchInfo);
+  //   console.log("matchInfo::: ", matchInfo);
+  const {
+    name,
+    matchType,
+    venue,
+    teams,
+    dateTimeGMT,
+    matchEnded,
+    matchStarted,
+  } = matchInfo?.data?.data;
+  const teamA = t1.split(" [")[0];
+  const teamAAcronym = t1.match(/\[(.*?)\]/)?.[1];
+  const teamB = t2.split(" [")[0];
+  const teamBAcronym = t2.match(/\[(.*?)\]/)?.[1];
+
+  const teamAImg = matchInfo?.data?.data?.teamInfo?.[0]?.img || t1img;
+  const teamBImg = matchInfo?.data?.data?.teamInfo?.[1]?.img || t2img;
+
+  //convert time
+  const matchTimeGMT = dateTimeGMT;
+  const matchDateGMT = new Date(matchTimeGMT + "Z");
+  const istMatchDate = toZonedTime(matchDateGMT, "Asia/Kolkata");
+  const formattedIstMatchDate = format(istMatchDate, "yyyy-MM-dd", {
+    timeZone: "Asia/Kolkata",
+  });
+  const formattedIstMatchTime = format(istMatchDate, "HH:mm", {
+    timeZone: "Asia/Kolkata",
+  });
+  const date = formattedIstMatchDate;
+  const startTime = formattedIstMatchTime;
+  if (
+    [matchId, name, matchType, teamA, teamB, startTime, date, venue].some(
+      (field) => field?.trim() === ""
+    )
+  ) {
+    throw new ApiError(400, "All fields are required");
+  }
+
+
+  //FIXME: players database call
+  const matchSquadApiEndpoint = "match_squad";
+  const matchSquadApiUrl = `${process.env.API_URL}${matchSquadApiEndpoint}?apikey=${process.env.API_KEY}&id=${matchId}`;
+  let matchSquadInfo;
+  try {
+    matchSquadInfo = await axios.get(matchSquadApiUrl);
+    //   console.log("Match Squad");
+    if (matchSquadInfo?.data.status === "failure") {
+      console.log("Error in match info api: ", matchSquadInfo?.data.reason);
+      // throw new ApiError(400, "Hits limit");
+      throw new ApiError(400, matchSquadInfo?.data.reason);
+    }
+  } catch (error) {
+    console.log("Error while fetching match squad");
+    throw new ApiError(400, error);
+  }
+  //   console.log("matchInfo::: ", matchInfo.data.data);
+  const { data } = matchSquadInfo.data;
+  // console.log("Squad: ", data)
+  if (data.length === 0) {
+    throw new ApiError(400, "Error due to squad not present");
+  }
+
+  // if ([teamName, players].some((field) => field?.trim() === "")) {
+  //   throw new ApiError(400, "All fields are required");
+  // }
+  const match = await Match.create({
+    matchId,
+    matchType,
+    name,
+    teamA,
+    teamB,
+    teamAAcronym,
+    teamBAcronym,
+    teamAImg,
+    teamBImg,
+    series,
+    date,
+    startTime,
+    venue,
+    matchEnded,
+    matchStarted,
+  });
+  if (!match) {
+    throw new ApiError(500, "Something went wrong while creating a match");
+  }
+
+  const match_squad = await Player.create({
+    matchId,
+    squad: data,
+  });
+  if (!match_squad) {
+    throw new ApiError(500, "Something went wrong while creating a squad");
+  }
+  //FIXME: squad/player controller done
+
+  const matchRef = match._id;
+  const squadRef = match_squad._id;
+  const contest = await Contest.create({
+    matchId,
+    entryFee,
+    prizePool,
+    maxParticipants,
+    matchRef,
+    squadRef,
+  });
+
+  if (!contest) {
+    throw new ApiError(500, "Something went wrong while creating a contest");
+  }
+
+  return res
+    .status(201)
+    .json(new ApiResponse(200, contest, "Contest created successfully"));
+
 });
 
 const deleteContest = asyncHandler(async (req, res) => {
