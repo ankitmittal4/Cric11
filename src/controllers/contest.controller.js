@@ -46,6 +46,7 @@ const getAllContestsOfGivenMatch = asyncHandler(async (req, res) => {
     throw new ApiError(500, "Error while fetching contests of given match");
   }
 });
+
 const getAllContests = asyncHandler(async (req, res) => {
   try {
     const contests = await Contest.aggregate([
@@ -76,6 +77,7 @@ const getAllContests = asyncHandler(async (req, res) => {
     throw new ApiError(500, "Error while fetching contests of given match");
   }
 });
+
 const getContestById = asyncHandler(async (req, res) => {
   try {
     // console.log("req.params: ", req.params);
@@ -180,7 +182,6 @@ const createContest = asyncHandler(async (req, res) => {
   }
   const isMatchPresent = await Match.findOne({ matchId });
   const matchSquad = await Player.findOne({ matchId });
-  // console.log("isMatchPresent: ", isMatchPresent);
   if (isMatchPresent) {
     const contest = await Contest.create({
       matchId,
@@ -263,19 +264,15 @@ const createContest = asyncHandler(async (req, res) => {
   let matchSquadInfo;
   try {
     matchSquadInfo = await axios.get(matchSquadApiUrl);
-    //   console.log("Match Squad");
     if (matchSquadInfo?.data.status === "failure") {
       console.log("Error in match info api: ", matchSquadInfo?.data.reason);
-      // throw new ApiError(400, "Hits limit");
       throw new ApiError(400, matchSquadInfo?.data.reason);
     }
   } catch (error) {
     console.log("Error while fetching match squad");
     throw new ApiError(400, error);
   }
-  //   console.log("matchInfo::: ", matchInfo.data.data);
   const { data } = matchSquadInfo.data;
-  // console.log("Squad: ", data)
   if (data.length === 0) {
     throw new ApiError(400, "Error due to squad not present");
   }
@@ -311,7 +308,6 @@ const createContest = asyncHandler(async (req, res) => {
   if (!match_squad) {
     throw new ApiError(500, "Something went wrong while creating a squad");
   }
-  //FIXME: squad/player controller done
 
   const matchRef = match._id;
   const squadRef = match_squad._id;
