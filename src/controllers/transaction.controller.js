@@ -8,11 +8,24 @@ import mongoose, { Mongoose } from "mongoose";
 const getAllTransactions = asyncHandler(async (req, res) => {
   try {
     const userId = req.user._id;
+
+    const page = parseInt(req.body.page) || 1;
+    const limit = parseInt(req.body.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    const totalTransactions = await Transaction.countDocuments({
+      userId: new mongoose.Types.ObjectId(userId),
+    });
+
     const transactions = await Transaction.aggregate([
       {
         $match: { userId: new mongoose.Types.ObjectId(userId) },
       },
+      { $sort: { createdAt: -1 } },
+      { $skip: skip },
+      { $limit: limit },
     ]);
+
     const user = await User.findById(userId);
     const { walletBalance } = user;
     if (transactions.length === 0) {
@@ -25,7 +38,16 @@ const getAllTransactions = asyncHandler(async (req, res) => {
       .json(
         new ApiResponse(
           200,
-          { transactions, walletBalance },
+          {
+            transactions,
+            walletBalance,
+            pagination: {
+              total: totalTransactions,
+              page,
+              limit,
+              totalPages: Math.ceil(totalTransactions / limit),
+            },
+          },
           "All Transaction fetched successfully"
         )
       );
