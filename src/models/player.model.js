@@ -25,6 +25,9 @@ const playerSchema = new Schema(
             country: {
               type: String,
             },
+            playerImg: {
+              type: String,
+            },
           },
         ],
       },

@@ -301,6 +301,7 @@ const createContest = asyncHandler(async (req, res) => {
     throw new ApiError(500, "Something went wrong while creating a match");
   }
 
+  // console.log("Match squad: ", data);
   const match_squad = await Player.create({
     matchId,
     squad: data,
