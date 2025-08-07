@@ -273,7 +273,8 @@ const createContest = asyncHandler(async (req, res) => {
     throw new ApiError(400, error);
   }
   const { data } = matchSquadInfo.data;
-  if (data.length === 0) {
+  // console.log("Players: ", data);
+  if (data.length <= 1) {
     throw new ApiError(400, "Error due to squad not present");
   }
 
