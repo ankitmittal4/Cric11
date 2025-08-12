@@ -58,4 +58,8 @@ app.get("/", (req, res) => {
   res.send("<h1>Backend server is running</h1>");
 });
 
+app.get("/health", (req, res) => {
+  res.status(200).send("OK");
+});
+
 export { app };
