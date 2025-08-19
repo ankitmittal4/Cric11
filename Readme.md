@@ -1,4 +1,5 @@
 # <p align="center" >🏏 Cric11 – Fantasy Cricket Web App (Backend) </p>
+<p align="center"> <img src="https://capsule-render.vercel.app/api?type=waving&color=0:38B2AC,100:2563EB&height=200&section=header&text=Cric11%20Backend&fontSize=40&fontColor=ffffff&animation=twinkling&fontAlignY=35" /> </p>
 <p align="center">
   <img src="https://img.shields.io/badge/Node.js-18.x-339933?style=for-the-badge&logo=node.js&logoColor=white" alt="Node.js"/>
   <img src="https://img.shields.io/badge/Express.js-4.x-000000?style=for-the-badge&logo=express&logoColor=white" alt="Express.js"/>
