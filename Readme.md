@@ -5,7 +5,7 @@
   <img src="https://img.shields.io/badge/MongoDB-6.x-47A248?style=for-the-badge&logo=mongodb&logoColor=white" alt="MongoDB"/>
   <img src="https://img.shields.io/badge/JWT-Auth-blue?style=for-the-badge&logo=jsonwebtokens&logoColor=white" alt="JWT"/>
   <img src="https://img.shields.io/badge/Razorpay-Payments-0D47A1?style=for-the-badge&logo=razorpay&logoColor=white" alt="Razorpay"/>
-  <img src="https://img.shields.io/badge/AWS-S3,EC2-orange?style=for-the-badge&logo=amazonaws&logoColor=white" alt="AWS"/>
+  <img src="https://img.shields.io/badge/AWS-EC2-orange?style=for-the-badge&logo=amazonaws&logoColor=white" alt="AWS"/>
   <img src="https://img.shields.io/badge/Nodemailer-Mailer-00BFFF?style=for-the-badge&logo=gmail&logoColor=white" alt="Nodemailer"/>
   
   <b>Cric11 Backend is the core service powering Cric11 Fantasy Cricket. It provides RESTful APIs for user authentication, contests, team creation, player stats, and payment integration.</b> 
@@ -33,9 +33,9 @@
 - Team building (selecting 11 players)
 - Captain & Vice-Captain assignment logic
 - Real-time player stats integration
-- Payment gateway integration (Razorpay)
-- MongoDB aggregation pipelines for leaderboards & scoring
-- Admin panel APIs (manage contests, users, and transactions)
+- Payment Gateway Integration (Razorpay)
+- MongoDB Aggregation pipelines for leaderboards & scoring
+- Admin Panel APIs (manage contests, users, and transactions)
 
 ---
 
@@ -43,19 +43,19 @@
 
 ## 🛠️ Tech Stack
 
-⚡ Node.js – Backend runtime
+⚡ Node.js – Backend Runtime
 
-🚀 Express.js – Web framework
+🚀 Express.js – Web Framework
 
 🗄️ MongoDB + Mongoose – Database & ODM
 
-🔑 JWT – Authentication & security
+🔑 JWT – Authentication & Security
 
-💳 Razorpay – Payment gateway integration
+💳 Razorpay – Payment Gateway Integration
 
-☁️ AWS (S3, EC2) – Storage & deployment
+☁️ AWS EC2 – Storage & Deployment
 
-🔄 Nodemailer – Email notifications
+🔄 Nodemailer – Email Notifications
 
 ---
 
