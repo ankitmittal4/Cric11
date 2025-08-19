@@ -1,5 +1,17 @@
 # <p align="center" >🏏 Cric11 – Fantasy Cricket Web App (Backend) </p>
-<p align="center"> <img src="https://capsule-render.vercel.app/api?type=waving&color=0:38B2AC,100:2563EB&height=200&section=header&text=Cric11%20Backend&fontSize=40&fontColor=ffffff&animation=twinkling&fontAlignY=35" /> </p> <p align="center"> <a href="https://github.com/your-username/cric11-backend/stargazers"> <img src="https://img.shields.io/github/stars/your-username/cric11-backend?style=for-the-badge&logo=github&color=yellow" alt="GitHub Stars"/> </a> <a href="https://github.com/your-username/cric11-backend/network/members"> <img src="https://img.shields.io/github/forks/your-username/cric11-backend?style=for-the-badge&logo=github&color=blue" alt="GitHub Forks"/> </a> <a href="https://github.com/your-username/cric11-backend/graphs/contributors"> <img src="https://img.shields.io/github/contributors/your-username/cric11-backend?style=for-the-badge&logo=github&color=green" alt="Contributors"/> </a> <a href="https://github.com/your-username/cric11-backend"> <img src="https://komarev.com/ghpvc/?username=your-username&repo=cric11-backend&style=for-the-badge&color=red" alt="Views"/> </a> </p> <p align="center"> <b>Cric11 Backend is the core service powering Cric11 Fantasy Cricket. It provides RESTful APIs for user authentication, contests, team creation, player stats, and payment integration.</b> </p>
+<p align="center">
+  <img src="https://img.shields.io/badge/Node.js-18.x-339933?style=for-the-badge&logo=node.js&logoColor=white" alt="Node.js"/>
+  <img src="https://img.shields.io/badge/Express.js-4.x-000000?style=for-the-badge&logo=express&logoColor=white" alt="Express.js"/>
+  <img src="https://img.shields.io/badge/MongoDB-6.x-47A248?style=for-the-badge&logo=mongodb&logoColor=white" alt="MongoDB"/>
+  <img src="https://img.shields.io/badge/JWT-Auth-blue?style=for-the-badge&logo=jsonwebtokens&logoColor=white" alt="JWT"/>
+  <img src="https://img.shields.io/badge/Razorpay-Payments-0D47A1?style=for-the-badge&logo=razorpay&logoColor=white" alt="Razorpay"/>
+  <img src="https://img.shields.io/badge/AWS-S3,EC2-orange?style=for-the-badge&logo=amazonaws&logoColor=white" alt="AWS"/>
+  <img src="https://img.shields.io/badge/Nodemailer-Mailer-00BFFF?style=for-the-badge&logo=gmail&logoColor=white" alt="Nodemailer"/>
+  
+  <b>Cric11 Backend is the core service powering Cric11 Fantasy Cricket. It provides RESTful APIs for user authentication, contests, team creation, player stats, and payment integration.</b> 
+</p>
+
+
 
 ---
 
