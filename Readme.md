@@ -8,6 +8,8 @@
   <img src="https://img.shields.io/badge/AWS-EC2-orange?style=for-the-badge&logo=amazonaws&logoColor=white" alt="AWS"/>
   <img src="https://img.shields.io/badge/Nodemailer-Mailer-00BFFF?style=for-the-badge&logo=gmail&logoColor=white" alt="Nodemailer"/>
   
+</p>
+<p align="center"> 
   <b>Cric11 Backend is the core service powering Cric11 Fantasy Cricket. It provides RESTful APIs for user authentication, contests, team creation, player stats, and payment integration.</b> 
 </p>
 
