@@ -174,7 +174,7 @@ const createContest = asyncHandler(async (req, res) => {
   } = req.body;
 
   if (
-    [matchId, entryFee, prizePool, maxParticipants].some(
+    [matchId, maxParticipants].some(
       (field) => field?.trim() === ""
     )
   ) {
