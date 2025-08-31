@@ -2,6 +2,7 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { Admin } from "../models/admin.model.js";
+import { User } from "../models/user.model.js";
 import jwt from "jsonwebtoken";
 
 const generateAccessAndRefreshToken = async (adminId) => {
@@ -16,6 +17,7 @@ const generateAccessAndRefreshToken = async (adminId) => {
         throw new ApiError(500, "Something went wrong");
     }
 };
+
 const registerAdmin = asyncHandler(async (req, res) => {
     const { username, email, password } = req.body;
 
@@ -117,5 +119,49 @@ const logoutAdmin = asyncHandler(async (req, res) => {
         .json(new ApiResponse(200, {}, "Admin logged out successfully"));
 });
 
+const getAllUsers = asyncHandler(async (req, res) => {
+    try {
+        // const userId = req.user._id;
 
-export { loginAdmin, registerAdmin, logoutAdmin };
+        const page = parseInt(req.body.page) || 1;
+        const limit = parseInt(req.body.limit) || 10;
+        const skip = (page - 1) * limit;
+
+        const totalUsers = await User.countDocuments();
+
+        const users = await User.aggregate([
+            { $sort: { createdAt: -1 } },
+            { $skip: skip },
+            { $limit: limit },
+        ]);
+
+        if (users.length === 0) {
+            return res
+                .status(404)
+                .json({ message: "No users found!" });
+        }
+
+        res
+            .status(200)
+            .json(
+                new ApiResponse(
+                    200,
+                    {
+                        users,
+                        pagination: {
+                            total: totalUsers,
+                            page,
+                            limit,
+                            totalPages: Math.ceil(totalUsers / limit),
+                        },
+                    },
+                    "All Users fetched successfully"
+                )
+            );
+    } catch (error) {
+        console.log("Error in getting all users");
+        throw new ApiError(500, "Error while fetching users");
+    }
+});
+
+export { loginAdmin, registerAdmin, logoutAdmin, getAllUsers };
