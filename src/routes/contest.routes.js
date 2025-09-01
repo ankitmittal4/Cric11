@@ -7,14 +7,14 @@ import {
   updateContest,
   getAllContests,
 } from "../controllers/contest.controller.js";
-import { verifyJWT } from "../middlewares/auth.middleware.js";
+import { verifyJWT, verifyJWTAdmin } from "../middlewares/auth.middleware.js";
 
 const router = Router();
 
 router.route("/all-contests").get(getAllContests);
 router.route("/all").post(getAllContestsOfGivenMatch);
 router.route("/get").post(getContestById);
-router.route("/create").post(createContest);
+router.route("/create").post(verifyJWTAdmin, createContest);
 router.route("/delete").delete(deleteContest);
 router.route("/update").patch(updateContest);
 
