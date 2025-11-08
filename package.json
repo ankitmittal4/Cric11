@@ -34,6 +34,7 @@
     "mongoose": "^8.5.0",
     "mongoose-aggregate-paginate-v2": "^1.1.1",
     "nodemailer": "^7.0.3",
+    "nodemailer-sendgrid": "^1.0.3",
     "razorpay": "^2.9.6"
   }
 }
