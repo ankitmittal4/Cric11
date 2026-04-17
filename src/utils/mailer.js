@@ -2,39 +2,36 @@ import nodemailer from "nodemailer";
 import { getEmailTemplate } from "./templates.js";
 import sgTransport from "nodemailer-sendgrid";
 
-// const transporter = nodemailer.createTransport({
-//     service: "SendGrid",
-//     // service: "gmail",
-//     auth: {
-//         // user: process.env.EMAIL_USER,
-//         // pass: process.env.EMAIL_PASS,
-//         user: "apikey",
-//         pass: process.env.SENDGRID_API_KEY,
-//     },
-// });
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+  },
+});
 
-const transporter = nodemailer.createTransport(
-  sgTransport({
-    apiKey: process.env.SENDGRID_API_KEY,
-  })
-);
+// const transporter = nodemailer.createTransport(
+//   sgTransport({
+//     apiKey: process.env.SENDGRID_API_KEY,
+//   })
+// );
 
 const sendEmail = async (to, type, data) => {
-    const { subject, html } = getEmailTemplate(type, data);
+  const { subject, html } = getEmailTemplate(type, data);
 
-    const mailOptions = {
-        from: `"Cric11" <${process.env.EMAIL_USER}>`,
-        to,
-        subject,
-        html,
-    };
+  const mailOptions = {
+    from: `"Cric11" <${process.env.EMAIL_USER}>`,
+    to,
+    subject,
+    html,
+  };
 
-    try {
-        await transporter.sendMail(mailOptions);
-        console.log(`Email sent to ${to} - ${type}`);
-    } catch (error) {
-        console.error("Error sending email:", error);
-    }
+  try {
+    await transporter.sendMail(mailOptions);
+    console.log(`Email sent to ${to} - ${type}`);
+  } catch (error) {
+    console.error("Error sending email:", error);
+  }
 };
 
 export { sendEmail };
